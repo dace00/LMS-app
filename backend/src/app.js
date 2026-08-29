@@ -1,17 +1,25 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+require('dotenv').config({path:'../.env'});
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 //Routes
 app.use('/route/student', require('./routes/student_route.js'));
 app.use('/route/teacher', require('./routes/teacher_route.js'));
+app.use('/route/auth', require('./routes/authRoutes'));
 //-------------
+
+app.get('/', (req, res) => {
+    res.json({ message: "Hello from the backend!" });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

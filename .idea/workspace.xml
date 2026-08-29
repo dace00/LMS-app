@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="83204058-1176-4a3b-a92f-23bece558322" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/neon.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/neon.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/authController.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/controllers/authController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/middleware/authMiddleware.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/middleware/authMiddleware.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pool/pool.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/pool/pool.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/authRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/routes/authRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/student_route.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/routes/student_route.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/teacher_route.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/routes/teacher_route.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="49" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;dace00&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/dace00/LMS-app&quot;,
+    &quot;accountId&quot;: &quot;25700f7d-ee24-4332-88e2-dc5570ac6d26&quot;
+  }
+}</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="1.7684946667335897E-104" />
+      <entry key="S2" value="1.1562038197232545E-26" />
+      <entry key="S5" value="4.9960519175536234E-11" />
+      <entry key="S10" value="1.2453614696133242E-5" />
+      <entry key="S30" value="0.0991601447030048" />
+      <entry key="S60" value="1.3881888595295635" />
+      <entry key="M2" value="6.599361492678277" />
+      <entry key="M5" value="22.27377447548223" />
+      <entry key="M10" value="39.34236031686456" />
+      <entry key="M15" value="51.65728714544924" />
+      <entry key="M30" value="83.4909831277008" />
+      <entry key="H1" value="151.86873568642395" />
+      <entry key="H2" value="314.58599533983823" />
+      <entry key="H4" value="574.2436072870883" />
+      <entry key="D1" value="1120.7756330379084" />
+      <entry key="W1" value="1278.8817759750746" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0000000000021243" />
+      <entry key="S60" value="1.000001457506081" />
+      <entry key="M2" value="1.001207272311685" />
+      <entry key="M5" value="1.0681736534117576" />
+      <entry key="M10" value="1.276996132340951" />
+      <entry key="M15" value="1.4920576062565585" />
+      <entry key="M30" value="2.1254113434616175" />
+      <entry key="H1" value="3.2986692535189515" />
+      <entry key="H2" value="5.57376362713788" />
+      <entry key="H4" value="9.04231497961473" />
+      <entry key="D1" value="16.43023463852841" />
+      <entry key="W1" value="18.599148145776397" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.0027621358640099515" />
+      <entry key="MS500" value="0.3077861033362291" />
+      <entry key="S2" value="0.7448387315613512" />
+      <entry key="S5" value="0.8888426812107978" />
+      <entry key="S10" value="0.9427959146899525" />
+      <entry key="S30" value="1.0768105384463855" />
+      <entry key="S60" value="2.361385671605594" />
+      <entry key="M2" value="7.557550590708608" />
+      <entry key="M5" value="23.279861721272145" />
+      <entry key="M10" value="40.556584209630756" />
+      <entry key="M15" value="53.09104792428892" />
+      <entry key="M30" value="85.56831128851246" />
+      <entry key="H1" value="155.13087591891536" />
+      <entry key="H2" value="320.1323706289348" />
+      <entry key="H4" value="583.2656979094346" />
+      <entry key="D1" value="1137.2001981372714" />
+      <entry key="W1" value="1297.4800185421952" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3IS3Zv4OFj3AYJZ4aAYHKz4NmQK" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/gorgi/OneDrive/Documents/Davor/LMS/LMS app code&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;database.query.execution&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\WebStorm 2026.2.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
+    ]
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\gorgi\OneDrive\Documents\Davor\LMS\LMS app code\backend" />
+      <recent name="C:\Users\gorgi\OneDrive\Documents\Davor\LMS\LMS app code" />
+      <recent name="C:\Users\gorgi\OneDrive\Documents\Davor\LMS\LMS app code\src" />
+      <recent name="C:\Users\gorgi\OneDrive\Documents\Davor\LMS\LMS app code\routes" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-WS-262.9437.145" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="83204058-1176-4a3b-a92f-23bece558322" name="Changes" comment="" />
+      <created>1786188248805</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1786188248805</updated>
+      <workItem from="1786188254457" duration="620000" />
+      <workItem from="1787744203008" duration="1563000" />
+      <workItem from="1787822926143" duration="14351000" />
+      <workItem from="1787848080210" duration="22000" />
+      <workItem from="1787852611701" duration="24000" />
+      <workItem from="1787910901291" duration="5948000" />
+      <workItem from="1787995107212" duration="11637000" />
+      <workItem from="1788014415117" duration="293000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
