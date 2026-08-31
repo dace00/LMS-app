@@ -2,4 +2,5 @@
 .neon
 node_modules/
 .env.local
-.env
+backend/src/.env
+

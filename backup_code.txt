@@ -1,0 +1,9 @@
+
+//frontend - studentDash.jsx 28:0
+useEffect(() => {
+        fetch('http://localhost:3000/student/courses', {
+            credentials: 'include',
+        })
+            .then(res => res.json())
+            .then (data => setCourses(data))
+    }, [])
