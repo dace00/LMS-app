@@ -80,7 +80,7 @@ function Student_dash () {
                                 <p>{course.instructor}</p>
                             </div>
                         ))}
-                   <button onClick={() => handleEnroll(1)}>Enroll course</button>
+                   <button onClick={() => handleEnroll(1)}>Enroll a course</button>
                 </div>
 
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
