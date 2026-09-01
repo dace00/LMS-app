@@ -8,27 +8,38 @@ function Login() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const authenticate = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await API.post('/login', {email, password});
-            const role = response.data.role;
 
-            if (role === 'admin' || role === 'teacher') {
-                navigate('/teacher-dashboard');
-            } else {
+    const handleLogin = async (e) => {
+        e.preventDefault();
+
+        try {
+            const response = await fetch("http://localhost:3000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // --- THIS MUST MATCH WHAT THE BACKEND SENDS (`data.token`) ---
+                localStorage.setItem('token', data.token);
+                console.log("Token saved successfully:", data.token);
+
                 navigate('/student-dashboard');
+            } else {
+                alert(data.error);
             }
-        }
-        catch (error) {
-            setError(error.response?.data?.error);
+        } catch (err) {
+            console.error("Login request failed:", err);
         }
     };
+    
     return (
         <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
             <h2>LMS Login</h2>
             {error && <p style={{ color: 'red' }}>{error}</p>}
-            <form onSubmit={authenticate} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <input
                     type="email"
                     placeholder="Email"
