@@ -24,7 +24,7 @@ function Verify(req, res, next) {
             return res.status(401).json({ error: err.message });
         }
         req.userId = decoded.userId;
-        req.role = decoded.role;
+        req.role = decoded.role; 
         next();
     });
 }

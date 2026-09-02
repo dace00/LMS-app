@@ -12,9 +12,9 @@ router.get('/student/courses', Verify, async (req, res) => {
 
     try {
         const result = await pool.query(
-            'SELECT title, description, instructor FROM courses c ' +
+            'SELECT title, description FROM courses c ' /*+
             'JOIN student_courses sc ON c.id = sc.courseId ' +
-            ' WHERE sc.student_id = $1', [studentId]
+            ' WHERE sc.student_id = $1', [studentId] */
         );
         res.json(result.rows);
     } catch(err) {

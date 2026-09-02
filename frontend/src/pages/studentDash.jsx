@@ -8,7 +8,6 @@ function Student_dash () {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // GRAB TOKEN FROM LOCALSTORAGE
         const token = localStorage.getItem('token');
         if (!token) {
             setError("Unauthorized, please log in");

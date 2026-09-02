@@ -47,14 +47,13 @@ const loginUser = async (req, res) => {
             return res.status(400).json({ error: "Wrong email or password" });
         }
 
-        // --- CREATE JWT TOKEN AFTER SUCCESSFUL PASSWORD CHECK ---
+      //Create jwt token
         const token = jwt.sign(
             { userId: user.id, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
-
-        // Send back the token and role instead of relying on sessions
+        //-------------------------------
         res.json({
             message: "Logged in successfully",
             token: token,

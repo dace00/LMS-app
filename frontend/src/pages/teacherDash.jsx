@@ -1,5 +1,5 @@
 import {useNavigate} from "react-router-dom";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 
 
 function Teacher_dash (req, res, next)  {
@@ -9,7 +9,47 @@ function Teacher_dash (req, res, next)  {
     const [description, setDescription] = useState('');
     const [file, setFile] = useState(null);
     const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
+    
+    useEffect(() => {
+        if (!token) {
+            setError('Unauthorized, please log in!');
+            return;
+        }
+
+        const fetchDashboard = async () => {
+            try {
+                const res = await fetch('http://localhost:3000/teacher-dashboard', {
+                    headers: {
+                        'authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || 'Failed to load dashboard');
+                }
+
+                setMessage(data.message);
+            } catch (err) {
+                setError(err.message);
+            }
+        };
+
+        fetchDashboard();
+    }, [token]);
+
+    if (error && !message) {
+        return (
+            <div style={{ padding: '30px', textAlign: 'center' }}>
+                <p style={{ color: 'red' }}>{error}</p>
+                <button onClick={() => navigate("/login")}>Login</button>
+            </div>
+        );
+    }
     const handleSubmit = async (e) => {
+        e.preventDefault();
         const form = new FormData();
         form.append("title", title);
         form.append("description", description);
@@ -17,13 +57,14 @@ function Teacher_dash (req, res, next)  {
             form.append("course-file", file);
         }
         try {
-            const res = await fetch('http://localhost:3000/teacher/courses', {
+            const res = await fetch('http://localhost:3000/teacher-dashboard', {
                 method: 'POST',
                 body: form,
                 headers: {
-                    'authentication': `Bearer ${token}`
+                    'authorization': `Bearer ${token}`
                 }
             })
+            
             const data = await res.json();
             if (!res.ok) {
                 throw new Error(data.error || 'Something went wrong.');
@@ -38,6 +79,7 @@ function Teacher_dash (req, res, next)  {
     }
     return (
         <div style={{ padding: '30px', maxWidth: '500px', margin: 'auto' }}>
+            <h1>{message}</h1>
             <h2>Create a New Course</h2>
             {error && <p style={{ color: 'red' }}>{error}</p>}
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -65,5 +107,7 @@ function Teacher_dash (req, res, next)  {
                 </button>
             </form>
         </div>
-    )
+    );
 }
+
+export default Teacher_dash;
