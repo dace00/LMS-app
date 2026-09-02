@@ -22,10 +22,9 @@ function Login() {
             const data = await response.json();
 
             if (response.ok) {
-                // --- THIS MUST MATCH WHAT THE BACKEND SENDS (`data.token`) ---
                 localStorage.setItem('token', data.token);
                 console.log("Token saved successfully:", data.token);
-
+                
                 navigate('/student-dashboard');
             } else {
                 alert(data.error);
