@@ -23,9 +23,10 @@ function Login() {
 
             if (response.ok) {
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('role', data.role);
                 console.log("Token saved successfully:", data.token);
                 
-                navigate('/student-dashboard');
+                navigate('/');
             } else {
                 alert(data.error);
             }

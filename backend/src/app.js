@@ -1,6 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
+const path = require('path');
 const router = require('./routes/student_route.js');
 require('dotenv').config();
 
@@ -28,6 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/', require('./routes/authRoutes.js'));
 app.use('/', require('./routes/student_route.js'));
 app.use('/', require('./routes/teacher_route.js'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 //-------------
 
 app.get('/', (req, res) => {
