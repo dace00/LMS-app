@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 function Student_dash () {
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const [courses, setCourses] = useState([]);
     const [error, setError] = useState(null);
+    const [files, setFile] = useState([]);
+    const [enrolledId, setEnrolledId] = useState([]);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -14,7 +16,6 @@ function Student_dash () {
             return;
         }
 
-        // 1. Fetch Dashboard Message
         fetch("http://localhost:3000/student-dashboard", {
             headers: {
                 'authorization': `Bearer ${token}`
@@ -30,7 +31,6 @@ function Student_dash () {
                 setError("Unauthorized, please log in");
             });
 
-        // 2. Fetch Courses
         fetch("http://localhost:3000/student/courses", {
             headers: {
                 'authorization': `Bearer ${token}`
@@ -40,7 +40,9 @@ function Student_dash () {
                 if (!res.ok) throw new Error("Failed to load courses");
                 return res.json();
             })
-            .then(data => setCourses(data))
+            .then(data => {setCourses(data.courses);
+                setFile(data.file)
+                setEnrolledId(data.enrolledIds || []);} )
             .catch(err => console.error(err));
 
     }, []);
@@ -71,6 +73,7 @@ function Student_dash () {
             })
             .then(data => {
                 alert(data.message || "Enrolled successfully!");
+                setEnrolledId(prev => [...prev, courseIdToEnroll]);
             })
             .catch(err => {
                 console.error("Error enrolling:", err);
@@ -88,13 +91,35 @@ function Student_dash () {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
                     <h3>Enrolled Courses</h3>
-                    {courses.map(course => (
+                    {courses.map(course => {
+                        const isEnrolled = enrolledId.includes(course.id)
+                        return(
                         <div key={course.id}>
-                            <p>{course.title}</p>
-                            <p>{course.instructor}</p>
+                            {isEnrolled ? (
+                                    <Link to={`courses/${course.id}`}>{course.title}</Link>)
+                                : (
+                                    <>
+                                    <span>{course.title}</span>
+                                <button onClick={() => handleEnroll(course.id)}>Enroll in course</button>
+                                    </>
+                        )}
                         </div>
-                    ))}
-                    <button onClick={() => handleEnroll(courses.id)}>Enroll a course</button>
+                        );
+                    })}
+                    {/* <ul>
+                        {files.map((file) => (
+                            <li key={file.id}>
+                                {file.name}{' '}
+                                <a
+                                    href={`http://localhost:3000${file.file_path}`}
+                                    target="_blank"
+                                >
+                                    Download / View
+                                </a>
+                            </li>
+                        ))}
+                    </ul> */}
+
                 </div>
 
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
