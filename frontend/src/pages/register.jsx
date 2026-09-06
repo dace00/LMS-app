@@ -9,7 +9,8 @@ function Register() {
         email: "",
         password: "",
         index_number: "",
-        phone_number: null
+        role: "student",
+        teacher_pass: ""
     });
     const [error, setError] = useState("");
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ function Register() {
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
-            await API.post('route/auth/register', forms);
+            await API.post('/register', forms);
             alert("Registered successfully!");
             navigate("/login");
         }
@@ -39,6 +40,29 @@ function Register() {
                 <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
                 <input type="text" name="index_number" placeholder="Index Number" onChange={handleChange} required />
                 <button type="submit" style={{ padding: '10px', background: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}>Register</button>
+                <div style={{ display: 'flex', gap: '20px', margin: '5px 0' }}>
+                    <label>
+                        <input
+                            type="radio"
+                            name="role"
+                            value="student"
+                            checked={forms.role === "student"}
+                            onChange={handleChange}
+                        /> Student
+                    </label>
+                    <label>
+                        <input
+                            type="radio"
+                            name="role"
+                            value="teacher"
+                            checked={forms.role === "teacher"}
+                            onChange={handleChange}
+                        /> Teacher
+                    </label>
+                </div>
+                {forms.role === "teacher" && (
+                    <input type="password" name="teacher_pass" placeholder="Enter passcode for teachers" onChange={handleChange} required />
+                )}
             </form>
             <p style={{ marginTop: '15px' }}>Already have an account? <Link to="/login">Log in</Link></p>
         </div>

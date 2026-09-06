@@ -20,7 +20,7 @@ function Verify(req, res, next) {
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if(err) {
-            console.log("3. JWT Verify Error:", err.message); // <--- See if token is expired/invalid
+            console.log("3. JWT Verify Error:", err.message); 
             return res.status(401).json({ error: err.message });
         }
         req.userId = decoded.userId;
