@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const registerUser = async (req, res) => {
-    const { first_name, last_name, email, password, index_number } = req.body;
+    const { first_name, last_name, email, password, index_number, role, teacher_pass } = req.body;
 
     try {
         const userExists = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
@@ -12,9 +12,13 @@ const registerUser = async (req, res) => {
         }
         const complex = 10;
         const hashedPassword = await bcrypt.hash(password, complex);
-        
+        if(role==="teacher" && teacher_pass !== process.env.TEACHER_PASS) {
+            return res.status(401).json({
+                error: "Invalid secret teacher password"
+            })
+        }
         const newUser = await pool.query(
-            'INSERT INTO users (first_name, last_name, email, password_hash, index_number, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, first_name, index_number, role', [first_name, last_name, email, hashedPassword, index_number, 'student']
+            'INSERT INTO users (first_name, last_name, email, password_hash, index_number, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, first_name, index_number, role', [first_name, last_name, email, hashedPassword, index_number, role]
         );
         return res.status(200).json(newUser);
         }

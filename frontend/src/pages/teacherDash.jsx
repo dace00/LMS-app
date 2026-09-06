@@ -10,6 +10,7 @@ function Teacher_dash (req, res, next)  {
     const [file, setFile] = useState(null);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
+    const [isEdit, setIsEdit] = useState(false);
     
     useEffect(() => {
         if (!token) {
@@ -81,8 +82,9 @@ function Teacher_dash (req, res, next)  {
     return (
         <div style={{ padding: '30px', maxWidth: '500px', margin: 'auto' }}>
             <h1>{message}</h1>
-            <h2>Create a New Course</h2>
+            <button onClick={() => setIsEdit(!isEdit) }>{isEdit ? "close creation" : "create new course"}</button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
+            {isEdit && (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <input
                     type="text"
@@ -107,6 +109,7 @@ function Teacher_dash (req, res, next)  {
                     Publish Course
                 </button>
             </form>
+                )}
         </div>
     );
 }
