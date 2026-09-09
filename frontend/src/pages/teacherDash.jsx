@@ -1,4 +1,4 @@
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {useState, useEffect} from "react";
 
 
@@ -6,11 +6,14 @@ function Teacher_dash (req, res, next)  {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
     const [title, setTitle] = useState('');
+    const [courses,setCourses] = useState([]);
     const [description, setDescription] = useState('');
     const [file, setFile] = useState(null);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [isEdit, setIsEdit] = useState(false);
+    const [viewCourse, setViewCourse] = useState(false);
+    const [courseId, setCourseId] = useState("");
     
     useEffect(() => {
         if (!token) {
@@ -37,9 +40,25 @@ function Teacher_dash (req, res, next)  {
                 setError(err.message);
             }
         };
+        
+        const getCourses = async () => {
+            try {
+                const course = await fetch('http://localhost:3000/student/courses', {
+                    headers: {
+                        'authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await course.json();
+               setCourses(data.courses);
+            }
+            catch (err) {
+                setError(err.message);
+            }
+        }
 
 
         fetchDashboard();
+        getCourses();
     }, [token]);
 
     if (error && !message) {
@@ -79,6 +98,32 @@ function Teacher_dash (req, res, next)  {
             setError(error.message);
         }
     }
+
+    const handleRemoval = async (courseId) => {
+        if (!window.confirm("Are you sure you want to delete this course?")) return;
+
+        try {
+            const res = await fetch(`http://localhost:3000/course-removal`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ courseId }) // Sending ID in the body
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to delete course');
+            }
+
+            setCourses(courses.filter(course => course.id !== courseId));
+            alert('Course deleted successfully!');
+        } catch (err) {
+            setError(err.message);
+        }
+    }
+
     return (
         <div style={{ padding: '30px', maxWidth: '500px', margin: 'auto' }}>
             <h1>{message}</h1>
@@ -110,6 +155,19 @@ function Teacher_dash (req, res, next)  {
                 </button>
             </form>
                 )}
+            <div>
+            <button onClick = {() => setViewCourse(!viewCourse)}>{viewCourse ? "Close list" : "View created courses (by all teachers)"}</button>
+            {viewCourse && (
+                courses.map(course => (
+                        <div key={course.id}>
+                            <h3>{course.title}</h3>
+                            <button onClick={() => navigate(`courses/modify/${course.id}`)}>Modify course</button>
+                            <button onClick={() => handleRemoval(course.id)}>Remove course</button>
+                        </div>
+                    ))
+            )}
+        </div>
+            
         </div>
     );
 }

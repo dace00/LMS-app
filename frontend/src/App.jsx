@@ -7,6 +7,7 @@ import Student_dash from "./pages/studentDash.jsx";
 import Teacher_dash from "./pages/teacherDash.jsx";
 import Nav from "./pages/nav.jsx";
 import CourseContent from "./pages/courseContent.jsx";
+import ModifyCourse from "./pages/modifyCourse.jsx";
 
 function App() {
   const [message, setMessage] = useState("");
@@ -31,7 +32,8 @@ function App() {
            <Route path="/register" element={<Register />} />
            <Route path="/student-dashboard" element={<Student_dash />} />
            <Route path="/teacher-dashboard" element={<Teacher_dash />}/>
-               <Route path={`/student-dashboard/courses/:id`} element={<CourseContent/>}/>
+           <Route path={`/student-dashboard/courses/:id`} element={<CourseContent/>}/>
+           <Route path={`teacher-dashboard/courses/modify/:id`} element={<ModifyCourse/>}/>
            </Routes>
        </BrowserRouter>
        </>
