@@ -30,4 +30,72 @@ router.post('/teacher-dashboard', Verify, upload.single('course-file'), async (r
     }
 })
 
+router.post("/course-removal", Verify, async (req, res) => {
+    const { courseId } = req.body;
+
+    try {
+        const result = await pool.query(
+            'DELETE FROM courses WHERE id = $1 RETURNING *',
+            [courseId]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Course not found' });
+        }
+
+        res.json({ message: 'Course deleted permanently!' });
+    } catch (err) {
+        console.error('Database deletion error:', err.message);
+        res.status(500).json({ error: 'Server error while deleting course' });
+    }
+});
+
+router.post("/student/courses/modify/:id", Verify, upload.array('course-files'), async (req, res) => {
+    const { id } = req.params;
+    const { title, description } = req.body;
+
+    try {
+        const result = await pool.query(
+            'UPDATE courses SET title = $1, description = $2 WHERE id = $3', [title, description, id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Course not found' });
+        }
+
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const name = file.originalname;
+                const file_path = `/uploads/${file.filename}`;
+                await pool.query(
+                    'INSERT INTO files (name, file_path, course_id) VALUES ($1, $2, $3)',
+                    [name, file_path, id]
+                );
+            }
+        }
+
+        res.json({ message: "Successfully updated course!" });
+    }
+    catch (error) {
+        console.error('Database update error:', error.message);
+        res.status(500).json({ error: 'Server error while updating course' });
+    }
+});
+
+router.post("/student/courses/files/:fileId", Verify, async (req, res) => {
+    const { fileId } = req.params;
+    try {
+      const result = await pool.query(
+            'DELETE FROM files WHERE id = $1 RETURNING *', [fileId]
+        );
+      if(result.rowCount === 0) {
+          return res.status(404).json({ error: 'file not found' });
+      }
+    }
+    catch (error) {
+        console.error('File deletion error:', error.message);
+        return res.status(500).json({ error: 'Server error while deleting file' });
+    }
+    return res.json({message: "Successfully removed file!"});
+})
 module.exports = router;
