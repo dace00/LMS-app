@@ -29,8 +29,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/', require('./routes/authRoutes.js'));
 app.use('/', require('./routes/student_route.js'));
 app.use('/', require('./routes/teacher_route.js'));
+app.use('/', require('./routes/task_route.js'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-//-------------
+app.use('/taskFiles', express.static(path.join(__dirname, 'taskUploads')));
+app.use('/submitUploads', express.static(path.join(__dirname, 'submitUploads')));
+//--------------------------------------------------------------------------------
 
 app.get('/', (req, res) => {
     res.json({message: "Connected successfully"});

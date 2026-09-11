@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Verify } = require('../middleware/authMiddleware'); 
+const { Verify } = require('../middleware/authMiddleware');
 const pool = require('../pool/pool.js');
 
 router.get("/student-dashboard", Verify, (req, res) => {
@@ -61,7 +61,10 @@ router.get('/student/courses/:id', Verify, async (req, res) => {
         const fileResult = await pool.query(
             'SELECT id,name,file_path FROM files WHERE course_id = $1', [courseId]
         );
-        return res.json({course: courseResult.rows[0], files: fileResult.rows});
+        const taskResult = await pool.query(
+            'SELECT id, title, due_date FROM tasks WHERE course_id = $1', [courseId]
+        )
+        return res.json({course: courseResult.rows[0], files: fileResult.rows, tasks: taskResult.rows});
     }
     catch (err) {
         return res.status(500).json({ error: "failed to fetch courses" });
