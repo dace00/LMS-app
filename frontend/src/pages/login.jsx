@@ -24,6 +24,7 @@ function Login() {
             if (response.ok) {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('role', data.role);
+                localStorage.setItem('userId', data.userId);
                 console.log("Token saved successfully:", data.token);
                 
                 navigate('/');

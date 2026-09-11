@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 
 function ModifyCourse() {
     const [course, setCourse] = useState({ title: '', description: '' });
     const [files, setFiles] = useState([]);
+    const [tasks, setTasks] = useState([]);
+    const [titleTask, setTitleTask] = useState('');
+    const [descTask, setDescTask] = useState('');
+    const [dueDateTask, setDueDateTask] = useState('');
+    const [taskFiles, setTaskFiles] = useState(null);
     const [error, setError] = useState('');
     const { id } = useParams();
     const navigate = useNavigate();
@@ -18,6 +23,9 @@ function ModifyCourse() {
                     setCourse(data.course);
                 }
                 setFiles(data.files || []);
+                if (data.tasks) {
+                    setTasks(data.tasks);
+                }
             })
             .catch(err => console.error("Error fetching course content:", err));
     }, [id]);
@@ -78,6 +86,40 @@ function ModifyCourse() {
         }
     };
 
+    const handleTask = async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('titleTask', titleTask);
+        formData.append('descTask', descTask);
+        formData.append('dueDateTask', dueDateTask);
+        if (taskFiles) {
+            formData.append('taskFiles', taskFiles);
+        }
+
+        try {
+            const res = await fetch(`http://localhost:3000/courses/modify/${id}/tasks`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: formData
+            })
+            const newTask = await res.json();
+            if (!res.ok) {
+                throw new Error(newTask.error || 'Failed to add task');
+            }
+            setTasks(prev => [...prev, newTask]);
+            setTitleTask('');
+            setDescTask('');
+            setDueDateTask('');
+            setTaskFiles(null);
+            alert('Task added successfully!');
+        }
+        catch(err) {
+            setError(err.message);
+        }
+    }
+
     const handleRemoval = async (fileId) => {
         if (typeof fileId === 'string' && fileId.startsWith('temp_')) {
             setFiles(files.filter(file => file.id !== fileId));
@@ -109,7 +151,7 @@ function ModifyCourse() {
     if (!course) return <p>Loading course details...</p>;
 
     return (
-        <div style={{ padding: '30px', maxWidth: '500px', margin: 'auto' }}>
+        <div style={{ padding: '30px', maxWidth: '600px', margin: 'auto' }}>
             <h2>Modify Course</h2>
             {error && <p style={{ color: 'red' }}>{error}</p>}
 
@@ -159,10 +201,58 @@ function ModifyCourse() {
                     )}
                     <input type="file" onChange={handleFileChange} />
                 </div>
-                <button type="submit" style={{ padding: '10px', background: '#28a745', color: 'white', border: 'none', cursor: 'pointer' }}>
+
+                <div style={{ marginTop: '20px', borderTop: '1px solid #ccc', paddingTop: '20px' }}>
+                    <h3>Course Tasks & Submissions</h3>
+                    {tasks.length === 0 ? (
+                        <p style={{ color: '#777' }}>No tasks created yet.</p>
+                    ) : (
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            {tasks.map((task) => (
+                                <li key={task.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f9f9f9', padding: '10px', marginBottom: '8px', borderRadius: '4px' }}>
+                                    <div>
+                                        <strong>{task.title}</strong>
+                                        <p style={{ fontSize: '12px', color: '#555', margin: '4px 0 0 0' }}>
+                                            Due: {task.due_date ? new Date(task.due_date).toLocaleString() : 'No due date'}
+                                        </p>
+                                    </div>
+                                    <Link
+                                        to={`/tasks/${task.id}/submissions`}
+                                        style={{ padding: '6px 12px', background: '#007bff', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}
+                                    >
+                                        View Submissions
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+
+                <div>
+                    <h3>Create new task</h3>
+                    <label>
+                        Title:
+                        <input type="text" value={titleTask} onChange={e => setTitleTask(e.target.value)} style={{ display: 'block', padding: '8px', width: '100%', boxSizing: 'border-box', marginBottom: '10px' }} />
+                    </label>
+                    <label>
+                        Description:
+                        <textarea name="task-desc" value={descTask} onChange={e => setDescTask(e.target.value)} style={{ display: 'block', padding: '8px', width: '100%', boxSizing: 'border-box', marginBottom: '10px' }} />
+                    </label>
+                    <label>
+                        Due date:
+                        <input type="datetime-local" value={dueDateTask} onChange={e => setDueDateTask(e.target.value)} style={{ display: 'block', padding: '8px', width: '100%', boxSizing: 'border-box', marginBottom: '10px' }} />
+                    </label>
+                    <label>
+                        Task File:
+                        <input type="file" onChange={e => setTaskFiles(e.target.files[0])} style={{ display: 'block', marginBottom: '10px' }} />
+                    </label>
+                    <button type="button" onClick={(e) => handleTask(e)} style={{ padding: '8px 12px', background: '#17a2b8', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>Add new task</button>
+                </div>
+
+                <button type="submit" style={{ padding: '10px', background: '#28a745', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>
                     Save Changes
                 </button>
-                <button type="button" onClick={() => navigate('/teacher-dashboard')}>Cancel</button>
+                <button type="button" onClick={() => navigate('/teacher-dashboard')} style={{ padding: '10px', background: '#6c757d', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>Cancel</button>
             </form>
         </div>
     );
