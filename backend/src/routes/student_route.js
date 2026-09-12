@@ -71,4 +71,24 @@ router.get('/student/courses/:id', Verify, async (req, res) => {
     }
 })
 
+router.get('/student/pending', Verify, async (req, res) => {
+    try {
+        const studentId = req.userId;
+        const query = `
+            SELECT tasks.*, courses.title AS course_title
+            FROM tasks
+                     JOIN courses ON tasks.course_id = courses.id
+                     LEFT JOIN submissions
+                               ON tasks.id = submissions.task_id
+                                   AND submissions.student_id = $1
+            WHERE submissions.task_id IS NULL;
+        `;
+        const result = await pool.query(query, [studentId]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json('Server Error');
+    }
+});
+
 module.exports = router;

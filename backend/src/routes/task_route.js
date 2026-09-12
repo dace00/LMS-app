@@ -110,4 +110,26 @@ router.post('/submissions/:subId/grade', Verify, async (req, res) => {
     }
 });
 
+router.get('/tasks/:taskId/submitRes', Verify, async (req, res) => {
+    const { taskId } = req.params;
+
+    try {
+        const result = await pool.query(
+            `SELECT submission_text, student_id, file_url, id, grade
+             FROM submissions
+             WHERE task_id = $1 AND student_id = $2`,
+            [taskId, req.userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "No submission found" });
+        }
+
+        res.status(200).json(result.rows[0]);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Unable to fetch submission" });
+    }
+});
 module.exports = router;

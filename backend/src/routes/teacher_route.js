@@ -98,4 +98,15 @@ router.post("/student/courses/files/:fileId", Verify, async (req, res) => {
     }
     return res.json({message: "Successfully removed file!"});
 })
+
+router.get('/teacher/ungraded', Verify, async (req, res) => {
+    try {
+        const result = await pool.query(`SELECT * FROM submissions WHERE grade IS NULL`);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json('Server Error');
+    }
+});
+
 module.exports = router;

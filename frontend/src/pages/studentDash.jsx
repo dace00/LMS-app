@@ -8,6 +8,7 @@ function Student_dash () {
     const [error, setError] = useState(null);
     const [files, setFile] = useState([]);
     const [enrolledId, setEnrolledId] = useState([]);
+    const [pendingTasks, setPendingTasks] = useState([]);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -45,6 +46,19 @@ function Student_dash () {
                 setEnrolledId(data.enrolledIds || []);} )
             .catch(err => console.error(err));
 
+
+        fetch("http://localhost:3000/student/pending", {
+            headers: {
+                'authorization': `Bearer ${token}`
+            }
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to load pending tasks");
+                return res.json();
+            })
+            .then(data => setPendingTasks(data))
+            .catch(err => console.error("Error fetching pending tasks:", err));
+
     }, []);
 
     if(error) {
@@ -63,7 +77,7 @@ function Student_dash () {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'authorization': `Bearer ${token}` 
+                'authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ course_id: courseIdToEnroll }),
         })
@@ -90,20 +104,20 @@ function Student_dash () {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                    <h3>Enrolled Courses</h3>
+                    <h3>Courses</h3>
                     {courses.map(course => {
                         const isEnrolled = enrolledId.includes(course.id)
                         return(
-                        <div key={course.id}>
-                            {isEnrolled ? (
-                                    <Link to={`courses/${course.id}`}>{course.title}</Link>)
-                                : (
-                                    <>
-                                    <span>{course.title}</span>
-                                <button onClick={() => handleEnroll(course.id)}>Enroll in course</button>
-                                    </>
-                        )}
-                        </div>
+                            <div key={course.id}>
+                                {isEnrolled ? (
+                                        <Link to={`courses/${course.id}`}>{course.title}</Link>)
+                                    : (
+                                        <>
+                                            <span>{course.title}</span>
+                                            <button onClick={() => handleEnroll(course.id)}>Enroll in course</button>
+                                        </>
+                                    )}
+                            </div>
                         );
                     })}
                     {/* <ul>
@@ -123,8 +137,20 @@ function Student_dash () {
                 </div>
 
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                    <h3>Assignments & Projects</h3>
-                    <p style={{ color: '#666' }}>No pending tasks right now.</p>
+                    <h3>Pending assignments</h3>
+                    {pendingTasks.length === 0 ? (
+                        <p style={{ color: '#666' }}>No pending tasks right now.</p>
+                    ) : (
+                        <ul style={{ paddingLeft: '20px', margin: '0' }}>
+                            {pendingTasks.map(task => (
+                                <li key={task.id} style={{ marginBottom: '10px' }}>
+                                    <strong>{task.title}</strong>
+                                    <p style={{ margin: '3px 0 0 0', color: '#555', fontSize: '0.9rem' }}>{task.description}</p>
+                                    <p>from course: {task.course_title}</p>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             </div>
         </div>
