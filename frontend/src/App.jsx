@@ -10,6 +10,7 @@ import CourseContent from "./pages/courseContent.jsx";
 import ModifyCourse from "./pages/modifyCourse.jsx";
 import TaskContent from "./pages/taskContent.jsx";
 import Submissions from "./pages/submissions.jsx";
+import Home from "./pages/home.jsx";
 
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
            <Route path={`teacher-dashboard/courses/modify/:id`} element={<ModifyCourse/>}/>
            <Route path={'student-dashboard/courses/:courseId/task/:taskId'} element={<TaskContent/>}/>
            <Route path={'/tasks/:taskId/submissions'} element={<Submissions/>}/>
+           <Route path={'/'} element={<Home/>}/>
            </Routes>
        </BrowserRouter>
        </>

@@ -14,7 +14,10 @@ function Teacher_dash (req, res, next)  {
     const [isEdit, setIsEdit] = useState(false);
     const [viewCourse, setViewCourse] = useState(false);
     const [courseId, setCourseId] = useState("");
-    
+
+    // Added state for ungraded submissions
+    const [ungradedSubmissions, setUngradedSubmissions] = useState([]);
+
     useEffect(() => {
         if (!token) {
             setError('Unauthorized, please log in!');
@@ -40,7 +43,7 @@ function Teacher_dash (req, res, next)  {
                 setError(err.message);
             }
         };
-        
+
         const getCourses = async () => {
             try {
                 const course = await fetch('http://localhost:3000/student/courses', {
@@ -49,16 +52,33 @@ function Teacher_dash (req, res, next)  {
                     }
                 });
                 const data = await course.json();
-               setCourses(data.courses);
+                setCourses(data.courses);
             }
             catch (err) {
                 setError(err.message);
             }
         }
 
+        
+        const getUngraded = async () => {
+            try {
+                const res = await fetch('http://localhost:3000/teacher/ungraded', {
+                    headers: {
+                        'authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setUngradedSubmissions(data);
+                }
+            } catch (err) {
+                console.error("Error fetching ungraded submissions:", err);
+            }
+        };
 
         fetchDashboard();
         getCourses();
+        getUngraded();
     }, [token]);
 
     if (error && !message) {
@@ -85,7 +105,7 @@ function Teacher_dash (req, res, next)  {
                     'authorization': `Bearer ${token}`
                 }
             })
-            
+
             const data = await res.json();
             if (!res.ok) {
                 throw new Error(data.error || 'Something went wrong.');
@@ -109,7 +129,7 @@ function Teacher_dash (req, res, next)  {
                     'Content-Type': 'application/json',
                     'authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ courseId }) // Sending ID in the body
+                body: JSON.stringify({ courseId })
             });
 
             const data = await res.json();
@@ -130,44 +150,58 @@ function Teacher_dash (req, res, next)  {
             <button onClick={() => setIsEdit(!isEdit) }>{isEdit ? "close creation" : "create new course"}</button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
             {isEdit && (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <input
-                    type="text"
-                    placeholder="Course Title"
-                    value={title}
-                    onChange={e => setTitle(e.target.value)}
-                    required
-                    style={{ padding: '10px' }}
-                />
-                <textarea
-                    placeholder="Course Description"
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    required
-                    style={{ padding: '10px', height: '100px' }}
-                />
-                <input
-                    type="file"
-                    onChange={e => setFile(e.target.files[0])}
-                />
-                <button type="submit" style={{ padding: '10px', background: '#007bff', color: 'white', border: 'none' }}>
-                    Publish Course
-                </button>
-            </form>
-                )}
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    <input
+                        type="text"
+                        placeholder="Course Title"
+                        value={title}
+                        onChange={e => setTitle(e.target.value)}
+                        required
+                        style={{ padding: '10px' }}
+                    />
+                    <textarea
+                        placeholder="Course Description"
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
+                        required
+                        style={{ padding: '10px', height: '100px' }}
+                    />
+                    <input
+                        type="file"
+                        onChange={e => setFile(e.target.files[0])}
+                    />
+                    <button type="submit" style={{ padding: '10px', background: '#007bff', color: 'white', border: 'none' }}>
+                        Publish Course
+                    </button>
+                </form>
+            )}
             <div>
-            <button onClick = {() => setViewCourse(!viewCourse)}>{viewCourse ? "Close list" : "View created courses (by all teachers)"}</button>
-            {viewCourse && (
-                courses.map(course => (
+                <button onClick = {() => setViewCourse(!viewCourse)}>{viewCourse ? "Close list" : "View created courses (by all teachers)"}</button>
+                {viewCourse && (
+                    courses.map(course => (
                         <div key={course.id}>
                             <h3>{course.title}</h3>
                             <button onClick={() => navigate(`courses/modify/${course.id}`)}>Modify course</button>
                             <button onClick={() => handleRemoval(course.id)}>Remove course</button>
                         </div>
                     ))
-            )}
-        </div>
-            
+                )}
+            </div>
+
+            {/* Added Section for Ungraded Submissions */}
+            <div style={{ marginTop: '30px', borderTop: '2px solid #eaeaea', paddingTop: '20px' }}>
+                <h3>Submissions Awaiting Grading</h3>
+                {ungradedSubmissions.length === 0 ? (
+                    <p style={{ color: '#666' }}>✅ Everything is fully graded!</p>
+                ) : (
+                    ungradedSubmissions.map(sub => (
+                        <div key={sub.id} style={{ background: '#f8f9fa', padding: '10px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ddd' }}>
+                            <p style={{ margin: '0' }}>Student ID: <strong>{sub.student_id}</strong> | Task ID: <strong>{sub.task_id}</strong></p>
+                        </div>
+                    ))
+                )}
+            </div>
+
         </div>
     );
 }
