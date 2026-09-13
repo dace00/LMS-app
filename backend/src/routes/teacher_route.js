@@ -12,24 +12,38 @@ const upload = multer({dest: 'uploads/'})
 
 router.post('/teacher-dashboard', Verify, upload.single('course-file'), async (req, res) => {
     const {title, description} = req.body;
-    const file = req.file.originalname;
-    const file_path = `/uploads/${req.file.filename}`;
     const instructorId = req.userId;
+
     try {
-       const newCourse =  await pool.query(
-            'INSERT INTO courses (title, description, instructor) VALUES ($1, $2, $3) RETURNING *', [title, description, instructorId]
-        )
+        const newCourse = await pool.query(
+            'INSERT INTO courses (title, description, instructor) VALUES ($1, $2, $3) RETURNING *',
+            [title, description, instructorId]
+        );
         const course_id = newCourse.rows[0].id;
-        const newFile = await pool.query(
-            'INSERT INTO files (name, file_path, course_id) VALUES ($1, $2, $3) RETURNING *', [file, file_path, course_id]
-        )
-        res.status(201).json({message: "Successfully added course!", course: newCourse.rows[0], file: newFile.rows[0]})
+
+        let newFileResult = null;
+
+        if (req.file) {
+            const file = req.file.originalname;
+            const file_path = `/uploads/${req.file.filename}`;
+            const fileQuery = await pool.query(
+                'INSERT INTO files (name, file_path, course_id) VALUES ($1, $2, $3) RETURNING *',
+                [file, file_path, course_id]
+            );
+            newFileResult = fileQuery.rows[0];
+        }
+
+        res.status(201).json({
+            message: "Successfully added course!",
+            course: newCourse.rows[0],
+            file: newFileResult
+        });
     }
     catch (error) {
+        console.error(error.message);
         res.status(400).json({error: "An error occured while trying to add course"});
     }
-})
-
+});
 router.post("/course-removal", Verify, async (req, res) => {
     const { courseId } = req.body;
 
@@ -101,7 +115,25 @@ router.post("/student/courses/files/:fileId", Verify, async (req, res) => {
 
 router.get('/teacher/ungraded', Verify, async (req, res) => {
     try {
-        const result = await pool.query(`SELECT * FROM submissions WHERE grade IS NULL`);
+        const teacherId = req.userId;
+        const result = await pool.query(`
+            SELECT
+                submissions.id AS submission_id,
+                submissions.submitted_at,
+                submissions.student_id,
+                submissions.task_id,
+                submissions.submission_text,
+                tasks.title AS task_title,
+                courses.title AS course_title,
+                users.first_name,
+                users.email
+            FROM submissions
+                     JOIN tasks ON submissions.task_id = tasks.id
+                     JOIN courses ON tasks.course_id = courses.id
+                     JOIN users ON submissions.student_id = users.id
+            WHERE courses.instructor = $1
+              AND submissions.grade IS null;
+        `, [teacherId]);
         res.json(result.rows);
     } catch (err) {
         console.error(err.message);

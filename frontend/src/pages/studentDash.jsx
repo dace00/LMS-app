@@ -7,6 +7,7 @@ function Student_dash () {
     const [courses, setCourses] = useState([]);
     const [error, setError] = useState(null);
     const [files, setFile] = useState([]);
+    const [isEnrolled, setIsEnrolled] = useState(false);
     const [enrolledId, setEnrolledId] = useState([]);
     const [pendingTasks, setPendingTasks] = useState([]);
 
@@ -95,6 +96,8 @@ function Student_dash () {
             });
     };
 
+    const unenrolledCourses = courses.filter(course => !enrolledId.includes(course.id));
+
     return (
         <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif' }}>
             <header style={{ borderBottom: '2px solid #eaeaea', paddingBottom: '10px', marginBottom: '20px' }}>
@@ -103,37 +106,33 @@ function Student_dash () {
             </header>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+                {unenrolledCourses.length > 0 && (
+                    <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                        <h3>Unenrolled Courses</h3>
+                        {unenrolledCourses.map(course => (
+                            <div key={course.id}>
+                                <span>{course.title}</span>
+                                <button onClick={() => handleEnroll(course.id)}>Enroll in course</button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                    <h3>Courses</h3>
+                    <h3>Enrolled Courses</h3>
                     {courses.map(course => {
                         const isEnrolled = enrolledId.includes(course.id)
                         return(
                             <div key={course.id}>
-                                {isEnrolled ? (
-                                        <Link to={`courses/${course.id}`}>{course.title}</Link>)
-                                    : (
-                                        <>
-                                            <span>{course.title}</span>
-                                            <button onClick={() => handleEnroll(course.id)}>Enroll in course</button>
-                                        </>
-                                    )}
+                                {isEnrolled && (
+                                    <>
+                                        <Link to={`courses/${course.id}`}>{course.title}</Link>
+                                    </>
+                                )}
                             </div>
                         );
                     })}
-                    {/* <ul>
-                        {files.map((file) => (
-                            <li key={file.id}>
-                                {file.name}{' '}
-                                <a
-                                    href={`http://localhost:3000${file.file_path}`}
-                                    target="_blank"
-                                >
-                                    Download / View
-                                </a>
-                            </li>
-                        ))}
-                    </ul> */}
-
                 </div>
 
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>

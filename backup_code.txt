@@ -7,3 +7,21 @@ useEffect(() => {
             .then(res => res.json())
             .then (data => setCourses(data))
     }, [])
+
+
+
+
+
+      {/* <ul>
+                            {files.map((file) => (
+                                <li key={file.id}>
+                                    {file.name}{' '}
+                                    <a
+                                        href={`http://localhost:3000${file.file_path}`}
+                                        target="_blank"
+                                    >
+                                        Download / View
+                                    </a>
+                                </li>
+                            ))}
+                        </ul> */}

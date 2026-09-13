@@ -69,7 +69,7 @@ const name = file ? file.originalname : null;
 const path = file ? `/submitUploads/${file.filename}` : null;
 try {
   await pool.query(
-        'INSERT INTO submissions (student_id ,task_id, file_url, submission_text, grade) VALUES ($1, $2, $3, $4, $5)', [userId, taskId, path, descSubmit, grade]
+        'INSERT INTO submissions (student_id ,task_id, file_url, file_name, submission_text, grade) VALUES ($1, $2, $3, $4, $5, $6)', [userId, taskId, path, name, descSubmit, grade]
     );
   res.status(200).json({message: "successfully submitted work"});
 }
@@ -83,7 +83,7 @@ router.get('/tasks/:taskId/submit', Verify,  async (req, res) => {
     const {taskId} = req.params;
     try {
         const result = await pool.query(
-            'SELECT submission_text, student_id, file_url, id, grade FROM submissions WHERE task_id = $1', [taskId]
+            'SELECT submission_text, student_id, file_url, file_name, id, grade FROM submissions WHERE task_id = $1', [taskId]
         )
         res.status(200).json(result.rows);
     }

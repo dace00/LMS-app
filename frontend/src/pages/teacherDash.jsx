@@ -14,8 +14,6 @@ function Teacher_dash (req, res, next)  {
     const [isEdit, setIsEdit] = useState(false);
     const [viewCourse, setViewCourse] = useState(false);
     const [courseId, setCourseId] = useState("");
-
-    // Added state for ungraded submissions
     const [ungradedSubmissions, setUngradedSubmissions] = useState([]);
 
     useEffect(() => {
@@ -59,7 +57,7 @@ function Teacher_dash (req, res, next)  {
             }
         }
 
-        
+
         const getUngraded = async () => {
             try {
                 const res = await fetch('http://localhost:3000/teacher/ungraded', {
@@ -188,15 +186,22 @@ function Teacher_dash (req, res, next)  {
                 )}
             </div>
 
-            {/* Added Section for Ungraded Submissions */}
             <div style={{ marginTop: '30px', borderTop: '2px solid #eaeaea', paddingTop: '20px' }}>
                 <h3>Submissions Awaiting Grading</h3>
                 {ungradedSubmissions.length === 0 ? (
                     <p style={{ color: '#666' }}>✅ Everything is fully graded!</p>
                 ) : (
                     ungradedSubmissions.map(sub => (
-                        <div key={sub.id} style={{ background: '#f8f9fa', padding: '10px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ddd' }}>
-                            <p style={{ margin: '0' }}>Student ID: <strong>{sub.student_id}</strong> | Task ID: <strong>{sub.task_id}</strong></p>
+                        <div key={sub.submission_id} style={{ background: '#f8f9fa', padding: '15px', marginBottom: '10px', borderRadius: '5px', border: '1px solid #ddd' }}>
+                            <p style={{ margin: '0 0 5px 0' }}>
+                                <strong>{sub.first_name}</strong> ({sub.email}) submitted for <em>{sub.task_title}</em> in <strong>{sub.course_title}</strong>
+                            </p>
+                            <p style={{ margin: '0 0 10px 0', color: '#555', fontSize: '0.9rem' }}>
+                                Description: {sub.submission_text}
+                            </p>
+                            <button style={{ padding: '5px 10px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }} onClick={() => navigate(`/tasks/${sub.task_id}/submissions`)}>
+                                Grade Work
+                            </button>
                         </div>
                     ))
                 )}

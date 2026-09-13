@@ -11,7 +11,6 @@ function TaskContent() {
     const { taskId } = useParams();
 
     useEffect(() => {
-        // Fetch task details and check if student already submitted
         const fetchTaskData = async () => {
             try {
                 const taskRes = await fetch(`http://localhost:3000/tasks/${taskId}`, {
@@ -23,7 +22,7 @@ function TaskContent() {
                 } else {
                     setTask(taskData);
                 }
-                
+
                 const subRes = await fetch(`http://localhost:3000/tasks/${taskId}/submitRes`, {
                     headers: { "Authorization": `Bearer ${localStorage.getItem('token')}` }
                 });
@@ -32,6 +31,7 @@ function TaskContent() {
                     const subData = await subRes.json();
                     if (subData && !subData.error) {
                         setSubmitRes(subData);
+                        setDescSubmit(subData.submission_text || "");
                         setIsSubmitted(true);
                     }
                 }
@@ -81,6 +81,7 @@ function TaskContent() {
             }
             alert("Successfully submitted work!");
             setSubmitRes(res);
+            setDescSubmit(res.submission_text || descSubmit);
             setIsSubmitted(true);
         }
         catch(err) {
@@ -102,23 +103,28 @@ function TaskContent() {
                 <p><strong>Due Date:</strong> {new Date(task.due_date).toLocaleString()}</p>
             </div>
             <div style={{ padding: '0 30px 30px 30px', maxWidth: '600px', margin: 'auto' }}>
-               
+
                 {!isSubmitted ? (
                     <>
-                    <h3>Submit your work: </h3>
-                    <form onSubmit={handleSubmit}>
-                        <label style={{ display: 'block', marginBottom: '15px' }}>
-                            Description
-                            <textarea
-                                name="description"
-                                value={descSubmit}
-                                onChange={(e) => setDescSubmit(e.target.value)}
-                                style={{ display: 'block', width: '100%', marginTop: '5px', minHeight: '80px' }}
-                            />
-                        </label>
-                        <input type="file" multiple onChange={(e) => handleFileChange(e)} style={{ display: 'block', marginBottom: '15px' }} />
-                        <button type="submit">Submit work</button>
-                    </form>
+                        <h3>Submit your work: </h3>
+                        <form onSubmit={handleSubmit}>
+                            <label style={{ display: 'block', marginBottom: '15px' }}>
+                                Description
+                                <textarea
+                                    name="description"
+                                    value={descSubmit}
+                                    onChange={(e) => setDescSubmit(e.target.value)}
+                                    style={{ display: 'block', width: '100%', marginTop: '5px', minHeight: '80px' }}
+                                />
+                            </label>
+                            {submitRes && submitRes.file_name && (
+                                <p style={{ fontSize: '0.9rem', color: '#555', marginBottom: '5px' }}>
+                                    Previously uploaded file: <strong>{submitRes.file_name}</strong>
+                                </p>
+                            )}
+                            <input type="file" multiple onChange={(e) => handleFileChange(e)} style={{ display: 'block', marginBottom: '15px' }} />
+                            <button type="submit">Submit work</button>
+                        </form>
                     </>
                 ) : (
                     <div>
@@ -128,11 +134,16 @@ function TaskContent() {
                             <>
                                 <p>Your ID: {submitRes.student_id}</p>
                                 <p>Your description: {submitRes.submission_text}</p>
+                                {submitRes.file_name && <p>Your file: {submitRes.file_name}</p>}
                                 {submitRes.grade !== null && submitRes.grade !== undefined ? (
                                     <p>Your grade: <strong>{submitRes.grade}</strong></p>
                                 ) : (
-                                    <p>Your grade: <span style={{opacity: "0.8"}}>not yet published</span></p>
+                                    <>
+                                        <p>Your grade: <span style={{opacity: "0.8"}}>not yet published</span></p>
+                                        <button onClick={() => setIsSubmitted(false)}>Edit submission</button>
+                                    </>
                                 )}
+
                             </>
                         )}
                     </div>
