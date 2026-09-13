@@ -72,6 +72,9 @@ function Submissions() {
     if (loading) return <p style={{ padding: '30px' }}>Loading submissions...</p>;
     if (error) return <p style={{ padding: '30px', color: 'red' }}>{error}</p>;
 
+    const ungradedSubmissions = submissions.filter(sub => sub.grade === null || sub.grade === undefined);
+    const gradedSubmissions = submissions.filter(sub => sub.grade !== null && sub.grade !== undefined);
+
     return (
         <div style={{ padding: '30px', maxWidth: '700px', margin: 'auto' }}>
             <Link to={-1}>← Back</Link>
@@ -80,48 +83,113 @@ function Submissions() {
             {submissions.length === 0 ? (
                 <p style={{ color: '#777', marginTop: '20px' }}>No submissions found for this task yet.</p>
             ) : (
-                submissions.map((sub, index) => {
-                    const subId = sub.student_id || index;
-                    const id = sub.id;
-                    return (
-                        <div
-                            key={index}
-                            style={{ background: '#f9f9f9', padding: '20px', borderRadius: '8px', marginTop: '20px', border: '1px solid #ddd' }}
-                        >
-                            <p><strong>Student ID:</strong> {sub.student_id}</p>
-                            <p><strong>Grade:</strong> {sub.grade !== null && sub.grade !== undefined ? sub.grade : 'Not graded yet'}</p>
-
-                            <div style={{ margin: '15px 0' }}>
-                                <strong>Description / Text:</strong>
-                                <p style={{ whiteSpace: 'pre-wrap', background: '#fff', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', marginTop: '5px' }}>
-                                    {sub.submission_text || sub.description || "No text provided."}
-                                </p>
-                            </div>
-
-                            <div>
-                                <strong>Attached File:</strong>
-                                {sub.file_url ? (
-                                    <a
-                                        href={`http://localhost:3000${sub.file_url}`}
-                                        target="_blank"
-                                        style={{display: "block"}}
-                                        rel="noopener noreferrer"
+                <>
+                    <div style={{ marginTop: '20px' }}>
+                        <h3>Ungraded Submissions</h3>
+                        {ungradedSubmissions.length === 0 ? (
+                            <p style={{ color: '#777', marginTop: '10px' }}>No ungraded submissions found.</p>
+                        ) : (
+                            ungradedSubmissions.map((sub, index) => {
+                                const subId = sub.student_id || index;
+                                const id = sub.id;
+                                return (
+                                    <div
+                                        key={index}
+                                        style={{ background: '#f9f9f9', padding: '20px', borderRadius: '8px', marginTop: '15px', border: '1px solid #ddd' }}
                                     >
-                                        Download / View File
-                                    </a>
-                                ) : (
-                                    <p style={{ color: '#777', marginTop: '5px' }}>No file attached.</p>
-                                )}
-                                <button
-                                    onClick={() => handleGrade(subId, id)}
-                                    style={{ marginTop: '10px', padding: '6px 12px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                                >
-                                    Add grade
-                                </button>
-                            </div>
-                        </div>
-                    );
-                })
+                                        <p><strong>Student ID:</strong> {sub.student_id}</p>
+                                        <p><strong>Grade:</strong> Not graded yet</p>
+
+                                        <div style={{ margin: '15px 0' }}>
+                                            <strong>Description / Text:</strong>
+                                            <p style={{ whiteSpace: 'pre-wrap', background: '#fff', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', marginTop: '5px' }}>
+                                                {sub.submission_text || sub.description || "No text provided."}
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <strong>Attached File:</strong>
+                                            {sub.file_url ? (
+                                                <>
+                                                    <p> {sub.file_name}</p>
+                                                    <a
+                                                        href={`http://localhost:3000${sub.file_url}`}
+                                                        target="_blank"
+                                                        style={{display: "block"}}
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        Download / View File
+                                                    </a>
+                                                </>
+                                            ) : (
+                                                <p style={{ color: '#777', marginTop: '5px' }}>No file attached.</p>
+                                            )}
+                                            <button
+                                                onClick={() => handleGrade(subId, id)}
+                                                style={{ marginTop: '10px', padding: '6px 12px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                            >
+                                                Add grade
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+
+                    <div style={{ marginTop: '40px' }}>
+                        <h3>Graded Submissions</h3>
+                        {gradedSubmissions.length === 0 ? (
+                            <p style={{ color: '#777', marginTop: '10px' }}>No graded submissions yet.</p>
+                        ) : (
+                            gradedSubmissions.map((sub, index) => {
+                                const subId = sub.student_id || index;
+                                const id = sub.id;
+                                return (
+                                    <div
+                                        key={index}
+                                        style={{ background: '#f9f9f9', padding: '20px', borderRadius: '8px', marginTop: '15px', border: '1px solid #ddd' }}
+                                    >
+                                        <p><strong>Student ID:</strong> {sub.student_id}</p>
+                                        <p><strong>Grade:</strong> {sub.grade}</p>
+
+                                        <div style={{ margin: '15px 0' }}>
+                                            <strong>Description / Text:</strong>
+                                            <p style={{ whiteSpace: 'pre-wrap', background: '#fff', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', marginTop: '5px' }}>
+                                                {sub.submission_text || sub.description || "No text provided."}
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <strong>Attached File:</strong>
+                                            {sub.file_url ? (
+                                                <>
+                                                    <p> {sub.file_name}</p>
+                                                    <a
+                                                        href={`http://localhost:3000${sub.file_url}`}
+                                                        target="_blank"
+                                                        style={{display: "block"}}
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        Download / View File
+                                                    </a>
+                                                </>
+                                            ) : (
+                                                <p style={{ color: '#777', marginTop: '5px' }}>No file attached.</p>
+                                            )}
+                                            <button
+                                                onClick={() => handleGrade(subId, id)}
+                                                style={{ marginTop: '10px', padding: '6px 12px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                            >
+                                                Add grade
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </>
             )}
         </div>
     );
