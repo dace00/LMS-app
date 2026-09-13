@@ -3,7 +3,12 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 
 function ModifyCourse() {
     const [course, setCourse] = useState({ title: '', description: '' });
-    const [files, setFiles] = useState([]);
+    const [sections, setSections] = useState([]);
+    const [selectedSectionId, setSelectedSectionId] = useState('');
+    const [newSectionTitle, setNewSectionTitle] = useState('');
+    const [pendingFile, setPendingFile] = useState(null);
+    const [editingSectionId, setEditingSectionId] = useState(null);
+    const [editingSectionTitle, setEditingSectionTitle] = useState('');
     const [tasks, setTasks] = useState([]);
     const [titleTask, setTitleTask] = useState('');
     const [descTask, setDescTask] = useState('');
@@ -22,7 +27,7 @@ function ModifyCourse() {
                 if (data.course) {
                     setCourse(data.course);
                 }
-                setFiles(data.files || []);
+                setSections(data.sections || []);
                 if (data.tasks) {
                     setTasks(data.tasks);
                 }
@@ -41,29 +46,26 @@ function ModifyCourse() {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
-        const newFileEntry = {
-            id: `temp_${Date.now()}`,
-            name: file.name,
-            fileObj: file
-        };
-
-        setFiles(prev => [...prev, newFileEntry]);
+        setPendingFile(file);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         const formData = new FormData();
-        formData.append("courseId", id);
         formData.append("title", course.title);
         formData.append("description", course.description);
 
-        files.forEach((file) => {
-            if (file.fileObj) {
-                formData.append("course-files", file.fileObj);
-            }
-        });
+        if (selectedSectionId) {
+            formData.append("section_id", selectedSectionId);
+        }
+        if (newSectionTitle) {
+            formData.append("section_title", newSectionTitle);
+        }
+
+        if (pendingFile) {
+            formData.append("course-files", pendingFile);
+        }
 
         try {
             const res = await fetch(`http://localhost:3000/student/courses/modify/${id}`, {
@@ -81,6 +83,54 @@ function ModifyCourse() {
 
             alert('Course updated successfully!');
             navigate('/teacher-dashboard');
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const handleUpdateSectionName = async (sectionId) => {
+        if (!editingSectionTitle.trim()) return;
+
+        try {
+            const res = await fetch(`http://localhost:3000/teacher/sections/${sectionId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ title: editingSectionTitle })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to update section name');
+            }
+
+            setSections(sections.map(sec => sec.id === sectionId ? { ...sec, title: data.title } : sec));
+            setEditingSectionId(null);
+            setEditingSectionTitle('');
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const handleDeleteSection = async (sectionId) => {
+        if (!window.confirm("Are you sure you want to clear/delete this section? All files inside it may be affected.")) return;
+
+        try {
+            const res = await fetch(`http://localhost:3000/teacher/sections/${sectionId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to delete section');
+            }
+
+            setSections(sections.filter(sec => sec.id !== sectionId));
         } catch (err) {
             setError(err.message);
         }
@@ -121,11 +171,6 @@ function ModifyCourse() {
     }
 
     const handleRemoval = async (fileId) => {
-        if (typeof fileId === 'string' && fileId.startsWith('temp_')) {
-            setFiles(files.filter(file => file.id !== fileId));
-            return;
-        }
-
         if (!window.confirm("Are you sure you want to delete this file?")) return;
 
         try {
@@ -140,7 +185,12 @@ function ModifyCourse() {
                 throw new Error(data.error || 'Failed to remove file');
             }
 
-            setFiles(files.filter(file => file.id !== fileId));
+            setSections(prevSections =>
+                prevSections.map(sec => ({
+                    ...sec,
+                    files: sec.files.filter(file => file.id !== fileId)
+                }))
+            );
             alert('File deleted successfully!');
         }
         catch (error) {
@@ -177,29 +227,100 @@ function ModifyCourse() {
                         style={{ display: 'block', padding: '10px', height: '100px', width: '100%', boxSizing: 'border-box' }}
                     />
                 </label>
+
                 <div>
-                    <h4>Attached Files:</h4>
-                    {files.length === 0 ? (
-                        <p style={{ color: '#777' }}>No files attached.</p>
+                    <h4>Manage Sections:</h4>
+                    {sections.length === 0 ? (
+                        <p style={{ color: '#777' }}>No sections created yet.</p>
                     ) : (
-                        <ul>
-                            {files.map((file) => (
-                                <li key={file.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                    <a href={`http://localhost:3000${file.file_path}`} target="_blank" rel="noopener noreferrer">
-                                        {file.name || 'Course Document'}
-                                    </a>
+                        sections.map(section => (
+                            <div key={section.id} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px', borderRadius: '4px', background: '#fafafa' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                    {editingSectionId === section.id ? (
+                                        <div style={{ display: 'flex', gap: '5px', flex: 1, marginRight: '10px' }}>
+                                            <input
+                                                type="text"
+                                                value={editingSectionTitle}
+                                                onChange={(e) => setEditingSectionTitle(e.target.value)}
+                                                style={{ padding: '4px', flex: 1 }}
+                                            />
+                                            <button type="button" onClick={() => handleUpdateSectionName(section.id)} style={{ background: '#28a745', color: 'white', border: 'none', padding: '4px 8px', cursor: 'pointer', borderRadius: '4px' }}>Save</button>
+                                            <button type="button" onClick={() => setEditingSectionId(null)} style={{ background: '#6c757d', color: 'white', border: 'none', padding: '4px 8px', cursor: 'pointer', borderRadius: '4px' }}>Cancel</button>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                            <strong>{section.title}</strong>
+                                            <button
+                                                type="button"
+                                                onClick={() => { setEditingSectionId(section.id); setEditingSectionTitle(section.title); }}
+                                                style={{ background: '#ffc107', border: 'none', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', fontSize: '12px' }}
+                                            >
+                                                Modify Name
+                                            </button>
+                                        </div>
+                                    )}
                                     <button
                                         type="button"
-                                        onClick={() => handleRemoval(file.id)}
-                                        style={{ background: '#e03043', color: 'white', border: 'none', padding: '4px 8px', cursor: 'pointer', borderRadius: '4px' }}
+                                        onClick={() => handleDeleteSection(section.id)}
+                                        style={{ background: '#dc3545', color: 'white', border: 'none', padding: '4px 8px', cursor: 'pointer', borderRadius: '4px', fontSize: '12px' }}
                                     >
-                                        Remove file
+                                        Clear Section
                                     </button>
-                                </li>
-                            ))}
-                        </ul>
+                                </div>
+                                <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                                    {section.files.length === 0 ? (
+                                        <li style={{ color: '#777', fontSize: '13px' }}>No files in this section.</li>
+                                    ) : (
+                                        section.files.map((file) => (
+                                            <li key={file.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                                <a href={`http://localhost:3000${file.file_path}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '14px' }}>
+                                                    {file.name || 'Course Document'}
+                                                </a>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoval(file.id)}
+                                                    style={{ background: '#e03043', color: 'white', border: 'none', padding: '2px 6px', cursor: 'pointer', borderRadius: '4px', fontSize: '11px' }}
+                                                >
+                                                    Remove file
+                                                </button>
+                                            </li>
+                                        ))
+                                    )}
+                                </ul>
+                            </div>
+                        ))
                     )}
-                    <input type="file" onChange={handleFileChange} />
+                </div>
+
+                <div style={{ border: '1px dashed #ccc', padding: '15px', borderRadius: '4px' }}>
+                    <h4>Add New File / Section</h4>
+                    <label style={{ display: 'block', marginBottom: '10px' }}>
+                        Select Existing Section:
+                        <select
+                            value={selectedSectionId}
+                            onChange={(e) => { setSelectedSectionId(e.target.value); setNewSectionTitle(''); }}
+                            style={{ display: 'block', padding: '8px', width: '100%', boxSizing: 'border-box' }}
+                        >
+                            <option value="">-- Choose Section --</option>
+                            {sections.map(sec => (
+                                <option key={sec.id} value={sec.id}>{sec.title}</option>
+                            ))}
+                        </select>
+                    </label>
+                    <label style={{ display: 'block', marginBottom: '10px' }}>
+                        Or Create New Section Title:
+                        <input
+                            type="text"
+                            value={newSectionTitle}
+                            onChange={(e) => { setNewSectionTitle(e.target.value); setSelectedSectionId(''); }}
+                            placeholder="e.g. Week 2 Materials"
+                            style={{ display: 'block', padding: '8px', width: '100%', boxSizing: 'border-box' }}
+                        />
+                    </label>
+                    <label>
+                        Upload File:
+                        <input type="file" onChange={handleFileChange} style={{ display: 'block', marginTop: '5px' }} />
+                    </label>
                 </div>
 
                 <div style={{ marginTop: '20px', borderTop: '1px solid #ccc', paddingTop: '20px' }}>

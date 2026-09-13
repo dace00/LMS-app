@@ -52,24 +52,62 @@ router.post('/student/courses', Verify, async (req, res) => {
 router.get('/student/courses/:id', Verify, async (req, res) => {
     const courseId = req.params.id;
     try {
+        // 1. Fetch course details
         const courseResult = await pool.query(
             'SELECT * FROM courses WHERE id = $1', [courseId]
         );
         if (courseResult.rows.length === 0) {
-          return  res.status(404).json({ error: "No course found with this id" });
+            return res.status(404).json({ error: "No course found with this id" });
         }
-        const fileResult = await pool.query(
-            'SELECT id,name,file_path FROM files WHERE course_id = $1', [courseId]
-        );
+
+        // 2. Fetch sections and LEFT JOIN their files
+        const sectionsQuery = `
+            SELECT 
+                s.id AS section_id, 
+                s.title AS section_title, 
+                f.id AS file_id, 
+                f.name, 
+                f.file_path 
+            FROM sections s
+            LEFT JOIN files f ON s.id = f.section_id
+            WHERE s.course_id = $1
+            ORDER BY s.id ASC;
+        `;
+        const sectionsResult = await pool.query(sectionsQuery, [courseId]);
+
+        const sectionsMap = {};
+        sectionsResult.rows.forEach(row => {
+            if (!sectionsMap[row.section_id]) {
+                sectionsMap[row.section_id] = {
+                    id: row.section_id,
+                    title: row.section_title,
+                    files: []
+                };
+            }
+            if (row.file_id) {
+                sectionsMap[row.section_id].files.push({
+                    id: row.file_id,
+                    name: row.name,
+                    file_path: row.file_path
+                });
+            }
+        });
+        
         const taskResult = await pool.query(
             'SELECT id, title, due_date FROM tasks WHERE course_id = $1', [courseId]
-        )
-        return res.json({course: courseResult.rows[0], files: fileResult.rows, tasks: taskResult.rows});
+        );
+
+        return res.json({
+            course: courseResult.rows[0],
+            sections: Object.values(sectionsMap),
+            tasks: taskResult.rows
+        });
     }
     catch (err) {
+        console.error(err.message);
         return res.status(500).json({ error: "failed to fetch courses" });
     }
-})
+});
 
 router.get('/student/pending', Verify, async (req, res) => {
     try {

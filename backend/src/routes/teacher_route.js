@@ -11,31 +11,40 @@ router.get('/teacher-dashboard', Verify, (req, res) => {
 const upload = multer({dest: 'uploads/'})
 
 router.post('/teacher-dashboard', Verify, upload.single('course-file'), async (req, res) => {
-    const {title, description} = req.body;
+    const { title, description, section_title } = req.body;
     const instructorId = req.userId;
 
     try {
+        // 1. Insert the course
         const newCourse = await pool.query(
             'INSERT INTO courses (title, description, instructor) VALUES ($1, $2, $3) RETURNING *',
             [title, description, instructorId]
         );
         const course_id = newCourse.rows[0].id;
 
-        let newFileResult = null;
+        const secTitle = section_title || "General";
+        const newSection = await pool.query(
+            'INSERT INTO sections (course_id, title) VALUES ($1, $2) RETURNING *',
+            [course_id, secTitle]
+        );
+        const section_id = newSection.rows[0].id;
 
+        let newFileResult = null;
+        
         if (req.file) {
             const file = req.file.originalname;
             const file_path = `/uploads/${req.file.filename}`;
             const fileQuery = await pool.query(
-                'INSERT INTO files (name, file_path, course_id) VALUES ($1, $2, $3) RETURNING *',
-                [file, file_path, course_id]
+                'INSERT INTO files (name, file_path, course_id, section_id) VALUES ($1, $2, $3, $4) RETURNING *',
+                [file, file_path, course_id, section_id]
             );
             newFileResult = fileQuery.rows[0];
         }
 
         res.status(201).json({
-            message: "Successfully added course!",
+            message: "Successfully added course with section!",
             course: newCourse.rows[0],
+            section: newSection.rows[0],
             file: newFileResult
         });
     }
@@ -66,7 +75,7 @@ router.post("/course-removal", Verify, async (req, res) => {
 
 router.post("/student/courses/modify/:id", Verify, upload.array('course-files'), async (req, res) => {
     const { id } = req.params;
-    const { title, description } = req.body;
+    const { title, description, section_id, section_title } = req.body;
 
     try {
         const result = await pool.query(
@@ -77,13 +86,23 @@ router.post("/student/courses/modify/:id", Verify, upload.array('course-files'),
             return res.status(404).json({ error: 'Course not found' });
         }
 
+        let targetSectionId = section_id || null;
+
+        if (section_title) {
+            const newSec = await pool.query(
+                'INSERT INTO sections (course_id, title) VALUES ($1, $2) RETURNING id',
+                [id, section_title]
+            );
+            targetSectionId = newSec.rows[0].id;
+        }
+
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
                 const name = file.originalname;
                 const file_path = `/uploads/${file.filename}`;
                 await pool.query(
-                    'INSERT INTO files (name, file_path, course_id) VALUES ($1, $2, $3)',
-                    [name, file_path, id]
+                    'INSERT INTO files (name, file_path, course_id, section_id) VALUES ($1, $2, $3, $4)',
+                    [name, file_path, id, targetSectionId]
                 );
             }
         }
@@ -93,6 +112,47 @@ router.post("/student/courses/modify/:id", Verify, upload.array('course-files'),
     catch (error) {
         console.error('Database update error:', error.message);
         res.status(500).json({ error: 'Server error while updating course' });
+    }
+});
+
+router.put('/teacher/sections/:sectionId', Verify, async (req, res) => {
+    const { sectionId } = req.params;
+    const { title } = req.body;
+
+    try {
+        const updateResult = await pool.query(
+            'UPDATE sections SET title = $1 WHERE id = $2 RETURNING *',
+            [title, sectionId]
+        );
+
+        if (updateResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Section not found' });
+        }
+
+        res.json(updateResult.rows[0]);
+    } catch (error) {
+        console.error('Section update error:', error.message);
+        res.status(500).json({ error: 'Server error while updating section' });
+    }
+});
+
+router.delete('/teacher/sections/:sectionId', Verify, async (req, res) => {
+    const { sectionId } = req.params;
+
+    try {
+        const deleteResult = await pool.query(
+            'DELETE FROM sections WHERE id = $1 RETURNING *',
+            [sectionId]
+        );
+
+        if (deleteResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Section not found' });
+        }
+
+        res.json({ message: 'Section deleted successfully' });
+    } catch (error) {
+        console.error('Section deletion error:', error.message);
+        res.status(500).json({ error: 'Server error while deleting section' });
     }
 });
 
