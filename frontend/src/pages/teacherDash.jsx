@@ -2,13 +2,13 @@ import {Link, useNavigate} from "react-router-dom";
 import {useState, useEffect} from "react";
 
 
-function Teacher_dash (req, res, next)  {
+function Teacher_dash ()  {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
     const [title, setTitle] = useState('');
     const [courses,setCourses] = useState([]);
     const [description, setDescription] = useState('');
-    const [file, setFile] = useState(null);
+    const [file, setFile] = useState([]);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [isEdit, setIsEdit] = useState(false);
@@ -92,8 +92,10 @@ function Teacher_dash (req, res, next)  {
         const form = new FormData();
         form.append("title", title);
         form.append("description", description);
-        if (file) {
-            form.append("course-file", file);
+        if(file.length !== 0) {
+            file.forEach(fil => {
+                form.append("course-file", fil);
+            });
         }
         try {
             const res = await fetch('http://localhost:3000/teacher-dashboard', {
@@ -166,7 +168,8 @@ function Teacher_dash (req, res, next)  {
                     />
                     <input
                         type="file"
-                        onChange={e => setFile(e.target.files[0])}
+                        accept='.pdf'
+                       multiple onChange={e => setFile(Array.from(e.target.files))}
                     />
                     <button type="submit" style={{ padding: '10px', background: '#007bff', color: 'white', border: 'none' }}>
                         Publish Course

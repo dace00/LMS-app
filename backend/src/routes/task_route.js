@@ -2,24 +2,27 @@ const express = require('express');
 const router = express.Router();
 const { Verify } = require('../middleware/authMiddleware');
 const pool = require('../pool/pool.js');
-const multer = require('multer');
-const result = require("pg/lib/query");
+const { uploadTask, uploadSubmit } = require('../middleware/uploadConfig');
 
+// --- TEACHER TASKS ROUTES ---
 
-const upload = multer({ dest: 'taskUploads/' });
-
-router.post('/courses/modify/:id/tasks', Verify, upload.array("taskFiles"), async (req, res) => {
+router.post('/courses/modify/:id/tasks', Verify, uploadTask.array("taskFiles"), async (req, res) => {
     const { id } = req.params;
     const { titleTask, descTask, dueDateTask } = req.body;
 
-    const file = req.files && req.files.length > 0 ? req.files[0] : null;
-    const name = file ? file.originalname : null;
-    const path = file ? `/taskFiles/${file.filename}` : null;
+    // Map multiple uploaded task files into arrays for PostgreSQL TEXT[] columns
+    const filePaths = req.files && req.files.length > 0
+        ? req.files.map(file => `/taskFiles/${file.filename}`)
+        : [];
+
+    const fileNames = req.files && req.files.length > 0
+        ? req.files.map(file => file.originalname)
+        : [];
 
     try {
         const result = await pool.query(
             'INSERT INTO tasks (course_id, title, description, due_date, file_name, file_path) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [id, titleTask, descTask, dueDateTask, name, path]
+            [id, titleTask, descTask, dueDateTask, fileNames, filePaths]
         );
         res.status(200).json(result.rows[0]);
     }
@@ -45,53 +48,66 @@ router.get('/courses/:id/tasks', Verify, async (req, res) => {
 });
 
 router.get('/tasks/:taskId', Verify, async (req, res) => {
-    const {taskId} = req.params;
+    const { taskId } = req.params;
     try {
         const result = await pool.query(
-            'SELECT title, description, due_date, file_name, file_path FROM tasks WHERE id = $1', [taskId]
-        )
+            'SELECT id, title, description, due_date, file_name, file_path FROM tasks WHERE id = $1', [taskId]
+        );
         res.status(200).json(result.rows[0]);
     }
     catch (error) {
         return res.status(400).json({ error: "unable to fetch task" });
     }
-})
+});
 
-const uploadSubmit = multer({dest: 'submitUploads'})
+
+// --- STUDENT SUBMISSIONS ROUTES ---
 
 router.post('/tasks/:taskId/submit', Verify, uploadSubmit.array("subm-files"), async (req, res) => {
-const {taskId} = req.params;
-const {descSubmit} = req.body;
-const {grade} = req.body;
-const userId = req.userId;
-const file = req.files && req.files.length > 0 ? req.files[0] : null;
-const name = file ? file.originalname : null;
-const path = file ? `/submitUploads/${file.filename}` : null;
-try {
-  await pool.query(
-        'INSERT INTO submissions (student_id ,task_id, file_url, file_name, submission_text, grade) VALUES ($1, $2, $3, $4, $5, $6)', [userId, taskId, path, name, descSubmit, grade]
-    );
-  res.status(200).json({message: "successfully submitted work"});
-}
-catch (error) {
-    console.log(error);
-    res.status(400).json({ error: "unable to upload submission" });
-}
-})
+    const { taskId } = req.params;
+    const { descSubmit, grade } = req.body;
+    const userId = req.userId;
 
-router.get('/tasks/:taskId/submit', Verify,  async (req, res) => {
-    const {taskId} = req.params;
+    const filePaths = req.files && req.files.length > 0
+        ? req.files.map(file => `/submitUploads/${file.filename}`)
+        : [];
+
+    const fileNames = req.files && req.files.length > 0
+        ? req.files.map(file => file.originalname)
+        : [];
+
+    try {
+        await pool.query(
+            'INSERT INTO submissions (student_id, task_id, file_url, file_name, submission_text, grade) VALUES ($1, $2, $3, $4, $5, $6)',
+            [userId, taskId, filePaths, fileNames, descSubmit, grade]
+        );
+
+        res.status(200).json({ message: "successfully submitted work" });
+    }
+    catch (error) {
+        console.log(error);
+        res.status(400).json({ error: "unable to upload submission" });
+    }
+});
+
+router.get('/tasks/:taskId/submit', Verify, async (req, res) => {
+    const { taskId } = req.params;
+
     try {
         const result = await pool.query(
-            'SELECT submission_text, student_id, file_url, file_name, id, grade FROM submissions WHERE task_id = $1', [taskId]
-        )
+            `SELECT id, student_id, submission_text, file_url, file_name, grade
+             FROM submissions
+             WHERE task_id = $1`,
+            [taskId]
+        );
+
         res.status(200).json(result.rows);
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ error: "unable to fetch submission" });
+        res.status(500).json({ error: "Unable to fetch submission" });
     }
-})
+});
 
 router.post('/submissions/:subId/grade', Verify, async (req, res) => {
     const { subId } = req.params;
@@ -115,7 +131,7 @@ router.get('/tasks/:taskId/submitRes', Verify, async (req, res) => {
 
     try {
         const result = await pool.query(
-            `SELECT submission_text, student_id, file_url, id, grade
+            `SELECT submission_text, student_id, file_url, file_name, id, grade
              FROM submissions
              WHERE task_id = $1 AND student_id = $2`,
             [taskId, req.userId]
@@ -132,4 +148,5 @@ router.get('/tasks/:taskId/submitRes', Verify, async (req, res) => {
         res.status(500).json({ error: "Unable to fetch submission" });
     }
 });
+
 module.exports = router;

@@ -11,6 +11,7 @@ import ModifyCourse from "./pages/modifyCourse.jsx";
 import TaskContent from "./pages/taskContent.jsx";
 import Submissions from "./pages/submissions.jsx";
 import Home from "./pages/home.jsx";
+import Profile from "./pages/profile.jsx";
 
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
            <Route path={'student-dashboard/courses/:courseId/task/:taskId'} element={<TaskContent/>}/>
            <Route path={'/tasks/:taskId/submissions'} element={<Submissions/>}/>
            <Route path={'/'} element={<Home/>}/>
+           <Route path={'/profile'} element={<Profile/>}/>
            </Routes>
        </BrowserRouter>
        </>

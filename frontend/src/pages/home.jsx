@@ -22,8 +22,12 @@ function Home() {
             .then(data => {
                 if(data.error) {
                     setError(data.error);
+                    localStorage.removeItem('token');
+                    setIsLoggedIn(false);
                 }
-                setName(data.user);
+                else {
+                    setName(data.user);
+                }
             })
             .catch(err => {console.log(err);
                 setError(err.message || "something went wrong");
