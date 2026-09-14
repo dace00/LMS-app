@@ -32,13 +32,12 @@ function Submissions() {
 
     const handleGrade = async (subId, id) => {
         let input, isValid = false;
-        while(!isValid) {
+        while (!isValid) {
             input = prompt("Enter Grade:");
-            if(input === null) return;
-            if(input.trim() !== "" && !isNaN(Number(input))) {
+            if (input === null) return;
+            if (input.trim() !== "" && !isNaN(Number(input))) {
                 isValid = true;
-            }
-            else {
+            } else {
                 alert("Please enter a number!");
             }
         }
@@ -62,8 +61,7 @@ function Submissions() {
                     (sub.id === subId) ? { ...sub, grade: Number(input) } : sub
                 )
             );
-        }
-        catch (error) {
+        } catch (error) {
             console.error(error);
             setError("Failed to add grade");
         }
@@ -92,6 +90,9 @@ function Submissions() {
                             ungradedSubmissions.map((sub, index) => {
                                 const subId = sub.student_id || index;
                                 const id = sub.id;
+                                const fileUrls = sub.file_url || [];
+                                const fileNames = sub.file_name || [];
+
                                 return (
                                     <div
                                         key={index}
@@ -103,34 +104,37 @@ function Submissions() {
                                         <div style={{ margin: '15px 0' }}>
                                             <strong>Description / Text:</strong>
                                             <p style={{ whiteSpace: 'pre-wrap', background: '#fff', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', marginTop: '5px' }}>
-                                                {sub.submission_text || sub.description || "No text provided."}
+                                                {sub.submission_text || "No text provided."}
                                             </p>
                                         </div>
 
                                         <div>
-                                            <strong>Attached File:</strong>
-                                            {sub.file_url ? (
-                                                <>
-                                                    <p> {sub.file_name}</p>
-                                                    <a
-                                                        href={`http://localhost:3000${sub.file_url}`}
-                                                        target="_blank"
-                                                        style={{display: "block"}}
-                                                        rel="noopener noreferrer"
-                                                    >
-                                                        Download / View File
-                                                    </a>
-                                                </>
+                                            <strong>Attached Files:</strong>
+                                            {fileUrls.length > 0 ? (
+                                                fileUrls.map((url, fileIndex) => (
+                                                    <div key={fileIndex} style={{ marginTop: '8px', marginBottom: '10px', background: '#fff', padding: '8px', borderRadius: '4px', border: '1px solid #eee' }}>
+                                                        <p style={{ margin: '0 0 4px 0' }}>📄 {fileNames[fileIndex] || `File ${fileIndex + 1}`}</p>
+                                                        <a
+                                                            href={`http://localhost:3000${url}`}
+                                                            target="_blank"
+                                                            style={{ display: "inline-block", color: '#007bff' }}
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            Download / View File
+                                                        </a>
+                                                    </div>
+                                                ))
                                             ) : (
-                                                <p style={{ color: '#777', marginTop: '5px' }}>No file attached.</p>
+                                                <p style={{ color: '#777', marginTop: '5px' }}>No files attached.</p>
                                             )}
-                                            <button
-                                                onClick={() => handleGrade(subId, id)}
-                                                style={{ marginTop: '10px', padding: '6px 12px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                                            >
-                                                Add grade
-                                            </button>
                                         </div>
+
+                                        <button
+                                            onClick={() => handleGrade(subId, id)}
+                                            style={{ marginTop: '10px', padding: '6px 12px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                        >
+                                            Add grade
+                                        </button>
                                     </div>
                                 );
                             })
@@ -145,6 +149,10 @@ function Submissions() {
                             gradedSubmissions.map((sub, index) => {
                                 const subId = sub.student_id || index;
                                 const id = sub.id;
+
+                                const fileUrls = sub.file_url || [];
+                                const fileNames = sub.file_name || [];
+
                                 return (
                                     <div
                                         key={index}
@@ -156,34 +164,37 @@ function Submissions() {
                                         <div style={{ margin: '15px 0' }}>
                                             <strong>Description / Text:</strong>
                                             <p style={{ whiteSpace: 'pre-wrap', background: '#fff', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', marginTop: '5px' }}>
-                                                {sub.submission_text || sub.description || "No text provided."}
+                                                {sub.submission_text || "No text provided."}
                                             </p>
                                         </div>
 
                                         <div>
-                                            <strong>Attached File:</strong>
-                                            {sub.file_url ? (
-                                                <>
-                                                    <p> {sub.file_name}</p>
-                                                    <a
-                                                        href={`http://localhost:3000${sub.file_url}`}
-                                                        target="_blank"
-                                                        style={{display: "block"}}
-                                                        rel="noopener noreferrer"
-                                                    >
-                                                        Download / View File
-                                                    </a>
-                                                </>
+                                            <strong>Attached Files:</strong>
+                                            {fileUrls.length > 0 ? (
+                                                fileUrls.map((url, fileIndex) => (
+                                                    <div key={fileIndex} style={{ marginTop: '8px', marginBottom: '10px', background: '#fff', padding: '8px', borderRadius: '4px', border: '1px solid #eee' }}>
+                                                        <p style={{ margin: '0 0 4px 0' }}>📄 {fileNames[fileIndex] || `File ${fileIndex + 1}`}</p>
+                                                        <a
+                                                            href={`http://localhost:3000${url}`}
+                                                            target="_blank"
+                                                            style={{ display: "inline-block", color: '#007bff' }}
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            Download / View File
+                                                        </a>
+                                                    </div>
+                                                ))
                                             ) : (
-                                                <p style={{ color: '#777', marginTop: '5px' }}>No file attached.</p>
+                                                <p style={{ color: '#777', marginTop: '5px' }}>No files attached.</p>
                                             )}
-                                            <button
-                                                onClick={() => handleGrade(subId, id)}
-                                                style={{ marginTop: '10px', padding: '6px 12px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                                            >
-                                                Add grade
-                                            </button>
                                         </div>
+
+                                        <button
+                                            onClick={() => handleGrade(subId, id)}
+                                            style={{ marginTop: '10px', padding: '6px 12px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                        >
+                                            Add grade
+                                        </button>
                                     </div>
                                 );
                             })

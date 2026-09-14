@@ -3,19 +3,31 @@ const router = express.Router();
 const multer = require('multer');
 const { isTeacher, Verify} = require('../middleware/authMiddleware');
 const pool = require('../pool/pool');
+const path = require('path');
 
 router.get('/teacher-dashboard', Verify, (req, res) => {
     res.json({message: "Welcome to Teacher Dashboard"});
 });
 
-const upload = multer({dest: 'uploads/'})
+const fileFilter = (req, file, cb) => {
+const allowedMimeTypes = ['application/pdf']
+    const extname = path.extname(file.originalname).toLowerCase();
+if(allowedMimeTypes.includes(file.mimetype) && extname === '.pdf') {
+    cb(null, true);
+}
+else {
+    cb( new Error('Unsupported file extension'), false);
+}
+}
 
-router.post('/teacher-dashboard', Verify, upload.single('course-file'), async (req, res) => {
+
+const upload = multer({dest: 'uploads/', limits: {fileSize: 10 * 1024 * 1024}, fileFilter: fileFilter});
+
+router.post('/teacher-dashboard', Verify, upload.array('course-file'), async (req, res) => {
     const { title, description, section_title } = req.body;
     const instructorId = req.userId;
 
     try {
-        // 1. Insert the course
         const newCourse = await pool.query(
             'INSERT INTO courses (title, description, instructor) VALUES ($1, $2, $3) RETURNING *',
             [title, description, instructorId]
@@ -29,28 +41,28 @@ router.post('/teacher-dashboard', Verify, upload.single('course-file'), async (r
         );
         const section_id = newSection.rows[0].id;
 
-        let newFileResult = null;
-        
-        if (req.file) {
-            const file = req.file.originalname;
-            const file_path = `/uploads/${req.file.filename}`;
-            const fileQuery = await pool.query(
-                'INSERT INTO files (name, file_path, course_id, section_id) VALUES ($1, $2, $3, $4) RETURNING *',
-                [file, file_path, course_id, section_id]
-            );
-            newFileResult = fileQuery.rows[0];
+        let newFileResults = [];
+
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const fileQuery = await pool.query(
+                    'INSERT INTO files (name, file_path, course_id, section_id) VALUES ($1, $2, $3, $4) RETURNING *',
+                    [file.originalname, `/uploads/${file.filename}`, course_id, section_id]
+                );
+                newFileResults.push(fileQuery.rows[0]);
+            }
         }
 
         res.status(201).json({
-            message: "Successfully added course with section!",
+            message: "Successfully added course with section and files!",
             course: newCourse.rows[0],
             section: newSection.rows[0],
-            file: newFileResult
+            files: newFileResults
         });
     }
     catch (error) {
         console.error(error.message);
-        res.status(400).json({error: "An error occured while trying to add course"});
+        res.status(400).json({ error: "An error occured while trying to add course" });
     }
 });
 router.post("/course-removal", Verify, async (req, res) => {
@@ -199,6 +211,14 @@ router.get('/teacher/ungraded', Verify, async (req, res) => {
         console.error(err.message);
         res.status(500).json('Server Error');
     }
+});
+
+router.use((err, req, res, next) => {
+    if (err.message === 'Unsupported file extension' || err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: "Please insert a pdf file (max 10MB)" });
+    }
+    console.error(err.message);
+    res.status(500).json({ error: "An unexpected server error occurred" });
 });
 
 module.exports = router;

@@ -13,7 +13,7 @@ function ModifyCourse() {
     const [titleTask, setTitleTask] = useState('');
     const [descTask, setDescTask] = useState('');
     const [dueDateTask, setDueDateTask] = useState('');
-    const [taskFiles, setTaskFiles] = useState(null);
+    const [taskFiles, setTaskFiles] = useState([]);
     const [error, setError] = useState('');
     const { id } = useParams();
     const navigate = useNavigate();
@@ -142,9 +142,9 @@ function ModifyCourse() {
         formData.append('titleTask', titleTask);
         formData.append('descTask', descTask);
         formData.append('dueDateTask', dueDateTask);
-        if (taskFiles) {
-            formData.append('taskFiles', taskFiles);
-        }
+        taskFiles.forEach((file) => {
+            formData.append('taskFiles', file);
+        });
 
         try {
             const res = await fetch(`http://localhost:3000/courses/modify/${id}/tasks`, {
@@ -319,7 +319,7 @@ function ModifyCourse() {
                     </label>
                     <label>
                         Upload File:
-                        <input type="file" onChange={handleFileChange} style={{ display: 'block', marginTop: '5px' }} />
+                        <input type="file" accept=".pdf" onChange={handleFileChange} style={{ display: 'block', marginTop: '5px' }} />
                     </label>
                 </div>
 
@@ -365,7 +365,7 @@ function ModifyCourse() {
                     </label>
                     <label>
                         Task File:
-                        <input type="file" onChange={e => setTaskFiles(e.target.files[0])} style={{ display: 'block', marginBottom: '10px' }} />
+                        <input type="file" multiple onChange={e => setTaskFiles(Array.from(e.target.files))} style={{ display: 'block', marginBottom: '10px' }} />
                     </label>
                     <button type="button" onClick={(e) => handleTask(e)} style={{ padding: '8px 12px', background: '#17a2b8', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>Add new task</button>
                 </div>

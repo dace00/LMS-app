@@ -60,7 +60,6 @@ router.get('/student/courses/:id', Verify, async (req, res) => {
             return res.status(404).json({ error: "No course found with this id" });
         }
 
-        // 2. Fetch sections and LEFT JOIN their files
         const sectionsQuery = `
             SELECT 
                 s.id AS section_id, 
