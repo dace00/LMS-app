@@ -4,7 +4,7 @@ const { Verify } = require('../middleware/authMiddleware');
 const pool = require('../pool/pool.js');
 const { uploadTask, uploadSubmit } = require('../middleware/uploadConfig');
 
-// --- TEACHER TASKS ROUTES ---
+
 
 router.post('/courses/modify/:id/tasks', Verify, uploadTask.array("taskFiles"), async (req, res) => {
     const { id } = req.params;
@@ -59,9 +59,6 @@ router.get('/tasks/:taskId', Verify, async (req, res) => {
         return res.status(400).json({ error: "unable to fetch task" });
     }
 });
-
-
-// --- STUDENT SUBMISSIONS ROUTES ---
 
 router.post('/tasks/:taskId/submit', Verify, uploadSubmit.array("subm-files"), async (req, res) => {
     const { taskId } = req.params;
