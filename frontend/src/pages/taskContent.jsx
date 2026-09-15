@@ -149,6 +149,7 @@ function TaskContent() {
                                 Attach Files
                                 <input
                                     type="file"
+                                    accept=".pdf"
                                     multiple
                                     onChange={handleFileChange}
                                     style={{ display: 'block', marginTop: '5px' }}

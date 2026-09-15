@@ -10,6 +10,7 @@ router.get('/teacher-dashboard', Verify, (req, res) => {
 });
 
 const fileFilter = (req, file, cb) => {
+    file.originalname = Buffer.from(file.originalname, 'latin1').toString('UTF-8')
 const allowedMimeTypes = ['application/pdf']
     const extname = path.extname(file.originalname).toLowerCase();
 if(allowedMimeTypes.includes(file.mimetype) && extname === '.pdf') {
@@ -20,8 +21,22 @@ else {
 }
 }
 
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + ext);
+    }
+});
 
-const upload = multer({dest: 'uploads/', limits: {fileSize: 10 * 1024 * 1024}, fileFilter: fileFilter});
+const upload = multer({
+    storage: storage, // Use 'storage' instead of 'dest'
+    limits: { fileSize: 10 * 1024 * 1024 },
+    fileFilter: fileFilter
+});
 
 router.post('/teacher-dashboard', Verify, upload.array('course-file'), async (req, res) => {
     const { title, description, section_title } = req.body;
