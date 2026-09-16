@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from "react-router-dom";
 
-function Student_dash () {
+function Student_dash() {
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const [courses, setCourses] = useState([]);
@@ -23,8 +23,8 @@ function Student_dash () {
                 'authorization': `Bearer ${token}`
             }
         })
-            .then(res =>  {
-                if(!res.ok) throw new Error("Unauthorized or session expired");
+            .then(res => {
+                if (!res.ok) throw new Error("Unauthorized or session expired");
                 return res.json();
             })
             .then(data => setMessage(data.message))
@@ -42,11 +42,12 @@ function Student_dash () {
                 if (!res.ok) throw new Error("Failed to load courses");
                 return res.json();
             })
-            .then(data => {setCourses(data.courses);
-                setFile(data.file)
-                setEnrolledId(data.enrolledIds || []);} )
+            .then(data => {
+                setCourses(data.courses);
+                setFile(data.file);
+                setEnrolledId(data.enrolledIds || []);
+            })
             .catch(err => console.error(err));
-
 
         fetch("http://localhost:3000/student/pending", {
             headers: {
@@ -62,11 +63,16 @@ function Student_dash () {
 
     }, []);
 
-    if(error) {
+    if (error) {
         return (
-            <div>
-                <p style={{color:'red'}}>{error}</p>
-                <button onClick={() => navigate('/login')}>Log in</button>
+            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+                <p className="text-red-400 font-medium text-lg">{error}</p>
+                <button
+                    onClick={() => navigate('/login')}
+                    className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition cursor-pointer"
+                >
+                    Log in
+                </button>
             </div>
         );
     }
@@ -99,58 +105,74 @@ function Student_dash () {
     const unenrolledCourses = courses.filter(course => !enrolledId.includes(course.id));
 
     return (
-        <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif' }}>
-            <header style={{ borderBottom: '2px solid #eaeaea', paddingBottom: '10px', marginBottom: '20px' }}>
-                <h1>Student Portal</h1>
-                <p style={{ color: '#007bff', fontSize: '1.1rem' }}>{message}</p>
+        <div className="p-8 max-w-7xl mx-auto w-full">
+            <header className="border-b-2 border-zinc-700 pb-4 mb-8">
+                <h1 className="text-3xl font-bold text-white mb-2">Student Portal</h1>
+                <p className="text-blue-400 text-lg font-medium">{message}</p>
             </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                {/* Unenrolled Courses Card */}
                 {unenrolledCourses.length > 0 && (
-                    <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                        <h3>Unenrolled Courses</h3>
-                        {unenrolledCourses.map(course => (
-                            <div key={course.id}>
-                                <span>{course.title}</span>
-                                <button onClick={() => handleEnroll(course.id)}>Enroll in course</button>
-                            </div>
-                        ))}
+                    <div className="bg-zinc-800 p-6 rounded-xl shadow-lg border border-zinc-700 flex flex-col gap-4">
+                        <h3 className="text-xl font-semibold text-white">Unenrolled Courses</h3>
+                        <div className="flex flex-col gap-3">
+                            {unenrolledCourses.map(course => (
+                                <div key={course.id} className="flex justify-between items-center bg-zinc-900/50 p-3 rounded-lg border border-zinc-700/50">
+                                    <span className="text-zinc-300 font-medium">{course.title}</span>
+                                    <button
+                                        onClick={() => handleEnroll(course.id)}
+                                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition cursor-pointer"
+                                    >
+                                        Enroll
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
 
-
-                <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                    <h3>Enrolled Courses</h3>
-                    {courses.map(course => {
-                        const isEnrolled = enrolledId.includes(course.id)
-                        return(
-                            <div key={course.id}>
-                                {isEnrolled && (
-                                    <>
-                                        <Link to={`courses/${course.id}`}>{course.title}</Link>
-                                    </>
-                                )}
-                            </div>
-                        );
-                    })}
+                {/* Enrolled Courses Card */}
+                <div className="bg-zinc-800 p-6 rounded-xl shadow-lg border border-zinc-700 flex flex-col gap-4">
+                    <h3 className="text-xl font-semibold text-white">Enrolled Courses</h3>
+                    <div className="flex flex-col gap-2">
+                        {courses.map(course => {
+                            const isEnrolled = enrolledId.includes(course.id);
+                            return (
+                                <div key={course.id}>
+                                    {isEnrolled && (
+                                        <Link
+                                            to={`courses/${course.id}`}
+                                            className="block p-3 bg-zinc-900/50 rounded-lg border border-zinc-700/50 text-zinc-300 hover:text-blue-400 hover:border-blue-500/50 transition font-medium no-underline"
+                                        >
+                                            {course.title}
+                                        </Link>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
 
-                <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                    <h3>Pending assignments</h3>
+                {/* Pending Tasks Card */}
+                <div className="bg-zinc-800 p-6 rounded-xl shadow-lg border border-zinc-700 flex flex-col gap-4">
+                    <h3 className="text-xl font-semibold text-white">Pending Assignments</h3>
                     {pendingTasks.length === 0 ? (
-                        <p style={{ color: '#666' }}>No pending tasks right now.</p>
+                        <p className="text-zinc-400 text-sm">No pending tasks right now.</p>
                     ) : (
-                        <ul style={{ paddingLeft: '20px', margin: '0' }}>
+                        <ul className="flex flex-col gap-3 list-none p-0 m-0">
                             {pendingTasks.map(task => (
-                                <li key={task.id} style={{ marginBottom: '10px' }}>
-                                    <strong>{task.title}</strong>
-                                    <p style={{ margin: '3px 0 0 0', color: '#555', fontSize: '0.9rem' }}>{task.description}</p>
-                                    <p>from course: {task.course_title}</p>
+                                <li key={task.id} className="bg-zinc-900/50 p-3 rounded-lg border border-zinc-700/50 flex flex-col gap-1">
+                                    <strong className="text-zinc-200">{task.title}</strong>
+                                    <p className="text-zinc-400 text-sm m-0">{task.description}</p>
+                                    <span className="text-xs text-blue-400 mt-1">Course: {task.course_title}</span>
                                 </li>
                             ))}
                         </ul>
                     )}
                 </div>
+
             </div>
         </div>
     );

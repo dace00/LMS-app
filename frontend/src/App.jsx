@@ -12,6 +12,7 @@ import TaskContent from "./pages/taskContent.jsx";
 import Submissions from "./pages/submissions.jsx";
 import Home from "./pages/home.jsx";
 import Profile from "./pages/profile.jsx";
+import GlobalStyle from "./pages/global-style.jsx";
 
 
 function App() {
@@ -25,14 +26,11 @@ function App() {
   }, []);
    return (
        <>
+       <div className="w-full min-h-screen bg-zinc-900 text-zinc-100 flex flex-col">
        <BrowserRouter>
-
-           <div className="App">
-               <h1> LMS frontend is live!</h1>
-               <p>Backend status: {message || 'connecting...'}</p>
-           </div>
            <Nav/>
            <Routes>
+           <Route element={<GlobalStyle />}>
            <Route path="/login" element={<Login />} />
            <Route path="/register" element={<Register />} />
            <Route path="/student-dashboard" element={<Student_dash />} />
@@ -43,8 +41,10 @@ function App() {
            <Route path={'/tasks/:taskId/submissions'} element={<Submissions/>}/>
            <Route path={'/'} element={<Home/>}/>
            <Route path={'/profile'} element={<Profile/>}/>
+           </Route>
            </Routes>
        </BrowserRouter>
+       </div>
        </>
    ); 
 }

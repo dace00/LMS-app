@@ -1,13 +1,11 @@
-import {useState} from 'react';
-import {useNavigate, Link} from 'react-router-dom';
-import API from '../api_handle/api.jsx';
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
-
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -26,27 +24,31 @@ function Login() {
                 localStorage.setItem('role', data.role);
                 localStorage.setItem('userId', data.userId);
                 console.log("Token saved successfully:", data.token);
-                
+
                 navigate('/');
             } else {
-                alert(data.error);
+                setError(data.error || "Login failed");
             }
         } catch (err) {
             console.error("Login request failed:", err);
+            setError("Something went wrong");
         }
     };
-    
+
     return (
-        <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
-            <h2>LMS Login</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="max-w-md mx-auto my-16 p-8 border border-none rounded-xl shadow-lg">
+            <h2 className="text-2xl  mb-6 text-center !text-[#d4d4d8]">LMS Login</h2>
+
+            {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
+
+            <form onSubmit={handleLogin} className="flex flex-col gap-4 form-card">
                 <input
                     type="email"
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    className="form-input"
                 />
                 <input
                     type="password"
@@ -54,12 +56,21 @@ function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    className="form-input"
                 />
-                <button type="submit"  style={{ padding: '10px', background: '#28a745', color: 'white', border: 'none', cursor: 'pointer' }}>Log In</button>
+                <button
+                    type="submit"
+                    className="form-btn"
+                >
+                    Log In
+                </button>
             </form>
-            <p style={{ marginTop: '15px' }}>Don't have an account? <Link to="/register">Register</Link></p>
+
+            <p className="mt-6 text-sm text-center text-zinc-400">
+                Don't have an account? <Link to="/register" className="text-emerald-600 font-semibold hover:underline">Register</Link>
+            </p>
         </div>
-    )
+    );
 }
 
 export default Login;

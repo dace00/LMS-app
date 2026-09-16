@@ -64,7 +64,7 @@ function Home() {
             <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px' }}>
                 {isLoggedIn ? (
                     <div>
-                        <h1 style={{ fontSize: '2.5rem', marginBottom: '15px', color: '#222' }}>Welcome Back {name.first_name}</h1>
+                        <h1 className="bg-orange-500 text-white" style={{ fontSize: '2.5rem', marginBottom: '15px' }}>Welcome Back {name.first_name}</h1>
                         <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '30px' }}>.</p>
                         {name.role === 'teacher' ? (<Link
                             to="/teacher-dashboard"

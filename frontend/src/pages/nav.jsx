@@ -1,23 +1,48 @@
-import {Link, useNavigate} from "react-router-dom";
-import {useEffect, useState, useRef} from "react";
+import { Link, useNavigate, NavLink } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
 
 function Nav() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [name, setName] = useState({});
+    const [error, setError] = useState(null); // Added missing error state
     const navigate = useNavigate();
     const ref = useRef(null);
     const token = localStorage.getItem("token");
 
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if(ref.current && !ref.current.contains(e.target)) {
+            if (ref.current && !ref.current.contains(e.target)) {
                 setIsDropdownOpen(false);
             }
-        }
+        };
+
         document.addEventListener("click", handleClickOutside);
+        
+        if (token) {
+            fetch(`http://localhost:3000/userName`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        setError(data.error);
+                        localStorage.removeItem('token');
+                    } else {
+                        setName(data.user);
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                    setError(err.message || "something went wrong");
+                });
+        }
+        
         return () => {
             document.removeEventListener("click", handleClickOutside);
-        }
-    })
+        };
+    }, [token]); // Added token as a dependency
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -25,76 +50,91 @@ function Nav() {
     };
 
     return (
-        <nav style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '15px 30px',
-            backgroundColor: '#ffffff',
-            borderBottom: '1px solid #eaeaea',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-            position: 'sticky',
-            top: 0,
-            zIndex: 1000
-        }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-                <Link to="/" style={{ fontSize: '1.5rem', fontWeight: 'bold', textDecoration: 'none', color: '#007bff' }}>
+        <nav className="w-full grid grid-cols-3 items-center px-8 py-4 border-none shadow-lg sticky top-0 z-50 bg-zinc-800">
+            <div className="flex items-center">
+                <h3 className="text-2xl font-bold no-underline text-emerald-400 cursor-default">
                     LMS
-                </Link>
-                <div style={{ display: 'flex', gap: '20px' }}>
-                    <Link to="/" style={{ textDecoration: 'none', color: '#555', fontWeight: '500' }}>Home</Link>
-                    <Link to="/student-dashboard" style={{ textDecoration: 'none', color: '#555', fontWeight: '500' }}>Student Dashboard</Link>
-                </div>
+                </h3>
             </div>
-            
-            <div style={{ position: 'relative' }}>
-                
-                    {token ? (
-                    <div style={{border: '1px solid black', borderRadius:"90%",  background: '#007bff'}} ref={ref}>
-                        <svg
-                        width="40px"
-                        height="40px"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    >
-                        <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                    </div>) : (
-                        <button onClick={() => navigate('/login')}>Login</button>
-                    )}
+            <div className="flex items-center justify-center gap-6">
+                <NavLink
+                    to="/"
+                    className={({ isActive }) =>
+                        `no-underline font-medium px-3 py-2 rounded-lg transition ${
+                            isActive
+                                ? 'bg-zinc-700 text-emerald-400'
+                                : 'text-zinc-300 hover:text-emerald-400 hover:bg-zinc-700/50'
+                        }`
+                    }
+                >
+                    Home
+
+                </NavLink>
+                {token && ( name.role === 'student' ? (
+                        <NavLink
+                            to="/student-dashboard"
+                            className={({ isActive }) =>
+                                `no-underline font-medium px-3 py-2 rounded-lg transition select-none ${
+                                    isActive
+                                        ? 'bg-zinc-700 text-emerald-400'
+                                        : 'text-zinc-300 hover:text-emerald-400 hover:bg-zinc-700/50'
+                                }`
+                            }
+                        >
+                            Student Dashboard
+                        </NavLink>
+                    ) : (
+                        <NavLink
+                            to="/teacher-dashboard"
+                            className={({ isActive }) =>
+                                `no-underline font-medium px-3 py-2 rounded-lg transition select-none ${
+                                    isActive
+                                        ? 'bg-zinc-700 text-emerald-400'
+                                        : 'text-zinc-300 hover:text-emerald-400 hover:bg-zinc-700/50'
+                                }`
+                            }
+                        >
+                            Teacher Dashboard
+                        </NavLink>
+                    ))}
 
                
+            </div>
+
+            <div className="relative flex justify-end">
+                {token ? (
+                    <div className="border border-black rounded-full bg-zinc-700 border-emerald-500/50 overflow-hidden cursor-pointer flex items-center justify-center p-1" ref={ref}>
+                        <svg
+                            className="w-10 h-10"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        >
+                            <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => navigate('/login')}
+                        className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition cursor-pointer"
+                    >
+                        Login
+                    </button>
+                )}
+
                 {isDropdownOpen && (
-                    <div style={{
-                        position: 'absolute',
-                        right: '0',
-                        top: '50px',
-                        backgroundColor: '#ffffff',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                        borderRadius: '8px',
-                        overflow: 'hidden',
-                        width: '150px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        border: '1px solid #eaeaea'
-                    }}>
+                    <div className="absolute right-0 top-14 bg-white shadow-lg rounded-lg overflow-hidden w-40 flex flex-col border border-gray-100 z-50">
                         <button
                             onClick={() => { setIsDropdownOpen(false); navigate('/profile'); }}
-                            style={{ padding: '12px 15px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '0.9rem' }}
-                            onMouseOver={(e) => e.target.style.background = '#f8f9fa'}
-                            onMouseOut={(e) => e.target.style.background = 'none'}
+                            className="px-4 py-3 border-none bg-transparent text-left cursor-pointer text-sm text-gray-700 hover:bg-gray-50 transition"
                         >
                             View Profile
                         </button>
                         <button
                             onClick={handleLogout}
-                            style={{ padding: '12px 15px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', color: 'red', fontSize: '0.9rem' }}
-                            onMouseOver={(e) => e.target.style.background = '#f8f9fa'}
-                            onMouseOut={(e) => e.target.style.background = 'none'}
+                            className="px-4 py-3 border-none bg-transparent text-left cursor-pointer text-sm text-red-500 hover:bg-gray-50 transition"
                         >
                             Log Out
                         </button>
