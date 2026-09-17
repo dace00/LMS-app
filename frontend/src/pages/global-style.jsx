@@ -2,7 +2,7 @@ import {Outlet} from "react-router-dom";
 
 function GlobalStyle() {
     return (
-        <div className="min-h-full w-full bg-zinc-800">
+        <div className="min-h-full w-full bg-zinc-900">
             <main className="flex-1 flex flex-col">
             <Outlet/>
             </main>

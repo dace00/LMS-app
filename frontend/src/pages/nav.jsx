@@ -1,11 +1,12 @@
-import { Link, useNavigate, NavLink } from "react-router-dom";
+import { Link, useNavigate, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 
 function Nav() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [name, setName] = useState({});
-    const [error, setError] = useState(null); // Added missing error state
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const location = useLocation();
     const ref = useRef(null);
     const token = localStorage.getItem("token");
 
@@ -17,7 +18,7 @@ function Nav() {
         };
 
         document.addEventListener("click", handleClickOutside);
-        
+
         if (token) {
             fetch(`http://localhost:3000/userName`, {
                 headers: {
@@ -38,21 +39,24 @@ function Nav() {
                     setError(err.message || "something went wrong");
                 });
         }
-        
+
         return () => {
             document.removeEventListener("click", handleClickOutside);
         };
-    }, [token]); // Added token as a dependency
+    }, [token]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
-        navigate('/login');
+        window.dispatchEvent(new Event("storage"));
+        navigate('/');
     };
+
+    const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
 
     return (
         <nav className="w-full grid grid-cols-3 items-center px-8 py-4 border-none shadow-lg sticky top-0 z-50 bg-zinc-800">
             <div className="flex items-center">
-                <h3 className="text-2xl font-bold no-underline text-emerald-400 cursor-default">
+                <h3 className="text-2xl font-bold no-underline select-none text-emerald-400 cursor-default">
                     LMS
                 </h3>
             </div>
@@ -60,7 +64,7 @@ function Nav() {
                 <NavLink
                     to="/"
                     className={({ isActive }) =>
-                        `no-underline font-medium px-3 py-2 rounded-lg transition ${
+                        `no-underline font-medium px-3 py-2 rounded-lg transition-all duration-300 ${
                             isActive
                                 ? 'bg-zinc-700 text-emerald-400'
                                 : 'text-zinc-300 hover:text-emerald-400 hover:bg-zinc-700/50'
@@ -71,39 +75,39 @@ function Nav() {
 
                 </NavLink>
                 {token && ( name.role === 'student' ? (
-                        <NavLink
-                            to="/student-dashboard"
-                            className={({ isActive }) =>
-                                `no-underline font-medium px-3 py-2 rounded-lg transition select-none ${
-                                    isActive
-                                        ? 'bg-zinc-700 text-emerald-400'
-                                        : 'text-zinc-300 hover:text-emerald-400 hover:bg-zinc-700/50'
-                                }`
-                            }
-                        >
-                            Student Dashboard
-                        </NavLink>
-                    ) : (
-                        <NavLink
-                            to="/teacher-dashboard"
-                            className={({ isActive }) =>
-                                `no-underline font-medium px-3 py-2 rounded-lg transition select-none ${
-                                    isActive
-                                        ? 'bg-zinc-700 text-emerald-400'
-                                        : 'text-zinc-300 hover:text-emerald-400 hover:bg-zinc-700/50'
-                                }`
-                            }
-                        >
-                            Teacher Dashboard
-                        </NavLink>
-                    ))}
+                    <NavLink
+                        to="/student-dashboard"
+                        className={({ isActive }) =>
+                            `no-underline font-medium px-3 py-2 rounded-lg transition-all duration-300 select-none ${
+                                isActive
+                                    ? 'bg-zinc-700 text-emerald-400'
+                                    : 'text-zinc-300 hover:text-emerald-400 hover:bg-zinc-700/50'
+                            }`
+                        }
+                    >
+                        Student Dashboard
+                    </NavLink>
+                ) : (
+                    <NavLink
+                        to="/teacher-dashboard"
+                        className={({ isActive }) =>
+                            `no-underline font-medium px-3 py-2 rounded-lg transition-all duration-300 select-none ${
+                                isActive
+                                    ? 'bg-zinc-700 text-emerald-400'
+                                    : 'text-zinc-300 hover:text-emerald-400 hover:bg-zinc-700/50'
+                            }`
+                        }
+                    >
+                        Teacher Dashboard
+                    </NavLink>
+                ))}
 
-               
+
             </div>
 
             <div className="relative flex justify-end">
                 {token ? (
-                    <div className="border border-black rounded-full bg-zinc-700 border-emerald-500/50 overflow-hidden cursor-pointer flex items-center justify-center p-1" ref={ref}>
+                    <div className=" transition-shadow duration-200 border border-black rounded-full bg-zinc-700 border-emerald-500/50 hover:ring-2  ring-emerald-500/60 overflow-hidden cursor-pointer flex items-center justify-center p-1" ref={ref}>
                         <svg
                             className="w-10 h-10"
                             viewBox="0 0 24 24"
@@ -118,7 +122,11 @@ function Nav() {
                 ) : (
                     <button
                         onClick={() => navigate('/login')}
-                        className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition cursor-pointer"
+                        className={`bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg cursor-pointer transition-all duration-300 overflow-hidden whitespace-nowrap ${
+                            isAuthPage
+                                ? "opacity-0  pointer-events-none "
+                                : "opacity-100 scale-100 w-auto px-4 py-2"
+                        }`}
                     >
                         Login
                     </button>

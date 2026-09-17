@@ -32,9 +32,9 @@ function Register() {
     };
 
     return (
-        <div className="flex-1 flex items-center justify-center p-6 bg-zinc-800">
+        <div className="flex-1 flex flex-col gap-3  items-center justify-center p-1 bg-zinc-800">
+            <h2 className="text-2xl  font-bold !text-[#d4d4d8] text-center mb-1">Register for LMS</h2>
             <div className="form-card max-w-md w-full">
-                <h2 className="text-2xl font-bold !text-[#d4d4d8] text-center mb-1">Register for LMS</h2>
                 <p className="text-sm text-zinc-400 text-center mb-6">Create your account to get started</p>
 
                 {error && (

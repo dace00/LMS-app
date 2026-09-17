@@ -7,7 +7,6 @@ function Student_dash() {
     const [courses, setCourses] = useState([]);
     const [error, setError] = useState(null);
     const [files, setFile] = useState([]);
-    const [isEnrolled, setIsEnrolled] = useState(false);
     const [enrolledId, setEnrolledId] = useState([]);
     const [pendingTasks, setPendingTasks] = useState([]);
 
@@ -19,9 +18,7 @@ function Student_dash() {
         }
 
         fetch("http://localhost:3000/student-dashboard", {
-            headers: {
-                'authorization': `Bearer ${token}`
-            }
+            headers: { 'authorization': `Bearer ${token}` }
         })
             .then(res => {
                 if (!res.ok) throw new Error("Unauthorized or session expired");
@@ -34,9 +31,7 @@ function Student_dash() {
             });
 
         fetch("http://localhost:3000/student/courses", {
-            headers: {
-                'authorization': `Bearer ${token}`
-            }
+            headers: { 'authorization': `Bearer ${token}` }
         })
             .then(res => {
                 if (!res.ok) throw new Error("Failed to load courses");
@@ -50,9 +45,7 @@ function Student_dash() {
             .catch(err => console.error(err));
 
         fetch("http://localhost:3000/student/pending", {
-            headers: {
-                'authorization': `Bearer ${token}`
-            }
+            headers: { 'authorization': `Bearer ${token}` }
         })
             .then(res => {
                 if (!res.ok) throw new Error("Failed to load pending tasks");
@@ -65,11 +58,11 @@ function Student_dash() {
 
     if (error) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 font-sans bg-zinc-900 text-zinc-100">
                 <p className="text-red-400 font-medium text-lg">{error}</p>
                 <button
                     onClick={() => navigate('/login')}
-                    className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition cursor-pointer"
+                    className="px-4 py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-500 transition cursor-pointer"
                 >
                     Log in
                 </button>
@@ -105,25 +98,36 @@ function Student_dash() {
     const unenrolledCourses = courses.filter(course => !enrolledId.includes(course.id));
 
     return (
-        <div className="p-8 max-w-7xl mx-auto w-full">
-            <header className="border-b-2 border-zinc-700 pb-4 mb-8">
-                <h1 className="text-3xl font-bold text-white mb-2">Student Portal</h1>
-                <p className="text-blue-400 text-lg font-medium">{message}</p>
+        <div className="min-h-screen bg-zinc-900 p-8 max-w-7xl mx-auto w-full font-sans text-zinc-100 flex flex-col items-center">
+            <header className="border-b-2 border-zinc-700 pb-4 mb-8 w-full max-w-5xl">
+                <h1 className="text-3xl font-bold text-white mb-2 inline-flex cursor-default group hover:animate-pulse">
+                    {"Student Portal".split("").map((char, index) => (
+                        <span
+                            key={index}
+                            className="transition-colors duration-300 group-hover:text-emerald-400"
+                            style={{ transitionDelay: `${index * 40}ms` }}
+                        >
+            {char === " " ? "\u00A0" : char}
+        </span>
+                    ))}
+                </h1>
+                {/* <p className="text-emerald-400 text-lg font-medium">{message}</p> */}
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className={`grid grid-cols-1 ${unenrolledCourses.length > 0 ? 'md:grid-cols-3 max-w-5xl' : 'md:grid-cols-2 max-w-3xl'} gap-6 my-12 w-full`}>
 
-                {/* Unenrolled Courses Card */}
                 {unenrolledCourses.length > 0 && (
-                    <div className="bg-zinc-800 p-6 rounded-xl shadow-lg border border-zinc-700 flex flex-col gap-4">
-                        <h3 className="text-xl font-semibold text-white">Unenrolled Courses</h3>
+                    <div className="feature-card flex flex-col gap-4">
+                        <h3 className="feature-title">Unenrolled Courses</h3>
                         <div className="flex flex-col gap-3">
                             {unenrolledCourses.map(course => (
-                                <div key={course.id} className="flex justify-between items-center bg-zinc-900/50 p-3 rounded-lg border border-zinc-700/50">
+                                <div key={course.id} className="flex justify-between items-center bg-zinc-900/50 p-3 rounded-lg
+                                border border-zinc-700/50">
                                     <span className="text-zinc-300 font-medium">{course.title}</span>
                                     <button
                                         onClick={() => handleEnroll(course.id)}
-                                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition cursor-pointer"
+                                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-lg
+                                        transition cursor-pointer"
                                     >
                                         Enroll
                                     </button>
@@ -133,9 +137,8 @@ function Student_dash() {
                     </div>
                 )}
 
-                {/* Enrolled Courses Card */}
-                <div className="bg-zinc-800 p-6 rounded-xl shadow-lg border border-zinc-700 flex flex-col gap-4">
-                    <h3 className="text-xl font-semibold text-white">Enrolled Courses</h3>
+                <div className="feature-card flex flex-col gap-4">
+                    <h3 className="feature-title">Enrolled Courses</h3>
                     <div className="flex flex-col gap-2">
                         {courses.map(course => {
                             const isEnrolled = enrolledId.includes(course.id);
@@ -144,7 +147,7 @@ function Student_dash() {
                                     {isEnrolled && (
                                         <Link
                                             to={`courses/${course.id}`}
-                                            className="block p-3 bg-zinc-900/50 rounded-lg border border-zinc-700/50 text-zinc-300 hover:text-blue-400 hover:border-blue-500/50 transition font-medium no-underline"
+                                            className="block p-3 bg-zinc-900/50 rounded-lg border border-zinc-700/50 text-zinc-300 hover:text-emerald-400 hover:border-emerald-500/50 transition font-medium no-underline"
                                         >
                                             {course.title}
                                         </Link>
@@ -155,18 +158,17 @@ function Student_dash() {
                     </div>
                 </div>
 
-                {/* Pending Tasks Card */}
-                <div className="bg-zinc-800 p-6 rounded-xl shadow-lg border border-zinc-700 flex flex-col gap-4">
-                    <h3 className="text-xl font-semibold text-white">Pending Assignments</h3>
+                <div className="feature-card flex flex-col gap-4">
+                    <h3 className="feature-title">Pending Assignments</h3>
                     {pendingTasks.length === 0 ? (
-                        <p className="text-zinc-400 text-sm">No pending tasks right now.</p>
+                        <p className="feature-desc">No pending tasks right now.</p>
                     ) : (
                         <ul className="flex flex-col gap-3 list-none p-0 m-0">
                             {pendingTasks.map(task => (
                                 <li key={task.id} className="bg-zinc-900/50 p-3 rounded-lg border border-zinc-700/50 flex flex-col gap-1">
-                                    <strong className="text-zinc-200">{task.title}</strong>
-                                    <p className="text-zinc-400 text-sm m-0">{task.description}</p>
-                                    <span className="text-xs text-blue-400 mt-1">Course: {task.course_title}</span>
+                                    <strong className="text-zinc-200">Title: {task.title}</strong>
+                                    <p className="feature-desc m-0">Description: {task.description}</p>
+                                    <span className="text-xs text-emerald-400 mt-1">Course: {task.course_title}</span>
                                 </li>
                             ))}
                         </ul>
