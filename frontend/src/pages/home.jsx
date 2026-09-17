@@ -6,33 +6,35 @@ function Home() {
     const [name, setName] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
         if (token) {
             setIsLoggedIn(true);
-        }
 
-        fetch(`http://localhost:3000/userName`, {
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
-        })
-            .then(res => res.json())
-            .then(data => {
-                if(data.error) {
-                    setError(data.error);
-                    localStorage.removeItem('token');
-                    setIsLoggedIn(false);
-                }
-                else {
-                    setName(data.user);
+            fetch(`http://localhost:3000/userName`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
                 }
             })
-            .catch(err => {console.log(err);
-                setError(err.message || "something went wrong");
-            });
-    }, []);
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        setError(data.error);
+                        localStorage.removeItem('token');
+                        setIsLoggedIn(false);
+                    } else {
+                        setName(data.user);
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                    setError(err.message || "something went wrong");
+                });
+        } else {
+            setIsLoggedIn(false);
+        }
+    }, [token]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -41,56 +43,74 @@ function Home() {
     };
 
     return (
-        <div style={{ fontFamily: 'sans-serif', minHeight: '100vh', backgroundColor: '#f9f9f9', display: 'flex', flexDirection: 'column' }}>
-            
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 40px', backgroundColor: 'white', borderBottom: '1px solid #eaeaea' }}>
-                <h2 style={{ margin: 0, color: '#333' }}>Welcome to the LMS platform!</h2>
-                <div>
-                    {isLoggedIn ? (
-                        <button
-                            onClick={handleLogout}
-                            style={{ padding: '8px 16px', backgroundColor: '#ff4d4d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-                        >
-                            Log out
-                        </button>
-                    ) : (
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <Link to="/login" style={{ padding: '8px 16px', textDecoration: 'none', color: '#007bff', fontWeight: 'bold' }}>Log in</Link>
-                        </div>
-                    )}
-                </div>
+        <div className="min-h-screen bg-zinc-900 flex flex-col font-sans">
+
+            <header className="flex items-start justify-center px-10 py-5 bg-zinc-800 shadow-md border-b border-zinc-700/50">
+                <h2 className="mt-5 text-xl font-bold text-center text-emerald-500">Welcome to the LMS platform!</h2>
             </header>
 
-            <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px' }}>
+            <main className="flex-1 flex flex-col items-center justify-center text-center px-10 py-10">
                 {isLoggedIn ? (
-                    <div>
-                        <h1 className="bg-orange-500 text-white" style={{ fontSize: '2.5rem', marginBottom: '15px' }}>Welcome Back {name.first_name}</h1>
-                        <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '30px' }}>.</p>
-                        {name.role === 'teacher' ? (<Link
-                            to="/teacher-dashboard"
-                            style={{ padding: '12px 24px', backgroundColor: '#007bff', color: 'white', textDecoration: 'none', borderRadius: '6px', fontSize: '1rem', fontWeight: 'bold' }}
-                        >
-                            Go to teacher Dashboard &rarr;
-                        </Link>) : (
-                            <Link to="/student-dashboard"  style={{ padding: '12px 24px', backgroundColor: '#007bff', color: 'white', textDecoration: 'none', borderRadius: '6px', fontSize: '1rem', fontWeight: 'bold' }}>
-                                Go to student dashboard &rarr;
+                    <div className="flex flex-col items-center">
+                        <h1 className="text-4xl font-extrabold mb-4 text-zinc-100">
+                            Welcome Back, <span className="text-emerald-400">{name.first_name || "User"}</span>
+                        </h1>
+                        <p className="text-zinc-400 text-lg mb-8">You're successfully logged into your portal.</p>
+
+                        {name.role === 'teacher' ? (
+                            <Link
+                                to="/teacher-dashboard"
+                                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg transition no-underline shadow-lg"
+                            >
+                                Go to Teacher Dashboard &rarr;
+                            </Link>
+                        ) : (
+                            <Link
+                                to="/student-dashboard"
+                                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg transition no-underline shadow-lg"
+                            >
+                                Go to Student Dashboard &rarr;
                             </Link>
                         )}
                     </div>
                 ) : (
-                    <div>
-                        <h1 style={{ fontSize: '3rem', marginBottom: '15px', color: '#222' }}>Manage teacher-student work</h1>
-                        <div>
-                            <h4>About this app</h4>
-                        <p style={{ fontSize: '1.2rem', color: '#666', maxWidth: '600px', marginBottom: '30px', lineHeight: '1.5' }}>
-                           This LMS (Learning Management System) app is an all-in-one platform where students can view assignments, upload their work securely, and track grades in real time - while teachers
-                            manage tasks and review submissions in one place.
-                        </p>
+                    <div className="max-w-2xl flex flex-col items-center ">
+                        <h1 className="text-5xl font-extrabold mb-6 text-zinc-100  tracking-tight">
+                            Manage teacher-student work seamlessly.
+                        </h1>
+                        <div className="mb-6"> 
+                            <h4 className="text-lg font-semibold text-emerald-400 mb-2">About this app</h4>
+                            <p className="text-zinc-400 text-lg leading-relaxed">
+                                This LMS (Learning Management System) app is an all-in-one platform where students can view assignments, upload their work securely, and track grades in real time—while teachers manage tasks and review submissions in one place.
+                            </p>
                         </div>
-                        <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+                        <div className="mt-5 mb-3">
+                            <h4 className="text-lg font-semibold text-emerald-400 mb-5">Available features</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-5xl w-full text-center">
+                            <div className="bg-zinc-800/60 p-6 rounded-xl border border-zinc-700/50">
+                                <h3 className="text-emerald-400 font-semibold text-lg mb-2 border-b-1">Secure Submissions</h3>
+                                <p className="text-zinc-400 text-sm leading-relaxed">
+                                    Students can easily upload assignments with validation, supporting pdf formats directly to their portal.
+                                </p>
+                            </div>
+                            <div className="bg-zinc-800/60 p-6 rounded-xl border border-zinc-700/50">
+                                <h3 className="text-emerald-400 font-semibold text-lg mb-2 border-b-1">Real-Time <br/> Tracking</h3>
+                                <p className="text-zinc-400 text-sm leading-relaxed">
+                                    Instant grade visibility and submission status updates so students never have to guess where they stand.
+                                </p>
+                            </div>
+                            <div className="bg-zinc-800/60 p-6 rounded-xl border border-zinc-700/50">
+                                <h3 className="text-emerald-400 font-semibold text-lg mb-2 border-b-1">Streamlined Grading</h3>
+                                <p className="text-zinc-400 text-sm leading-relaxed">
+                                    Teachers can review incoming student work, post grades, and manage tasks efficiently from a unified dashboard.
+                                </p>
+                            </div>
+                        </div>
+                        </div>
+                        <div className="flex justify-center gap-4">
                             <Link
                                 to="/login"
-                                style={{ padding: '12px 24px', backgroundColor: '#007bff', color: 'white', textDecoration: 'none', borderRadius: '6px', fontSize: '1rem', fontWeight: 'bold' }}
+                                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg transition no-underline shadow-lg"
                             >
                                 Let's get started by logging in first
                             </Link>

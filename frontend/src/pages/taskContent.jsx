@@ -84,8 +84,6 @@ function TaskContent() {
                 throw new Error(res.error || "something went wrong");
             }
             alert("Successfully submitted work!");
-
-            // Reload to pull fresh submission response data with file arrays
             window.location.reload();
         }
         catch (err) {
@@ -93,148 +91,193 @@ function TaskContent() {
         }
     };
 
-    if (error) return <p style={{ color: 'red', padding: '30px' }}>{error}</p>;
-    if (!task) return <p style={{ padding: '30px' }}>Loading task details...</p>;
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-950 text-red-400 flex items-center justify-center p-8">
+                <p className="text-lg bg-red-950/40 border border-red-900/50 p-4 rounded-xl">{error}</p>
+            </div>
+        );
+    }
+
+    if (!task) {
+        return (
+            <div className="min-h-screen bg-gray-950 text-gray-300 flex items-center justify-center">
+                <p className="text-lg animate-pulse">Loading task details...</p>
+            </div>
+        );
+    }
 
     return (
-        <>
-            <div style={{ padding: '30px', maxWidth: '600px', margin: 'auto' }}>
-                <Link to={-1}>← Back</Link>
-                <h1>{task.title}</h1>
-                <p style={{ margin: '20px 0', whiteSpace: 'pre-wrap' }}>{task.description}</p>
+        <div className="min-h-screen text-gray-100 p-6 md:p-10 font-sans">
+            <Link
+                to={-1}
+                className="inline-flex items-center text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors mb-6"
+            >
+                ← Back
+            </Link>
 
-                {/* Helpful files list (Supports multiple files from teacher) */}
-                <div style={{ margin: '15px 0' }}>
-                    <p><strong>Helpful files:</strong></p>
-                    {task.file_path && task.file_path.length > 0 ? (
-                        task.file_path.map((path, index) => (
-                            <div
-                                key={index}
-                                style={{ marginTop: '8px', background: '#f9f9f9', padding: '8px 12px', borderRadius: '4px', border: '1px solid #ddd' }}
-                            >
-                                <a
-                                    href={`http://localhost:3000${path}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{ color: '#007bff' }}
-                                >
-                                    📄 {task.file_name?.[index] || `File ${index + 1}`}
-                                </a>
-                            </div>
-                        ))
-                    ) : (
-                        <p style={{ color: '#777', fontSize: '0.9rem', marginTop: '5px' }}>No helpful files attached.</p>
-                    )}
-                </div>
+            <div className="max-w-5xl mx-auto space-y-8">
+                {/* Task Details Card */}
+                <div className="bg-zinc-800/60 max-w-md mx-auto p-6 rounded-xl border border-zinc-700/50 transition-all duration-300 hover:border-emerald-500/50">
+                    <h1 className="text-2xl font-bold text-white mb-3">{task.title}</h1>
+                    <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap mb-4">{task.description}</p>
 
-                <p style={{ marginTop: '15px' }}><strong>Due Date:</strong> {new Date(task.due_date).toLocaleString()}</p>
-            </div>
-
-            <div style={{ padding: '0 30px 30px 30px', maxWidth: '600px', margin: 'auto' }}>
-                {!isSubmitted ? (
-                    <>
-                        <h3>Submit your work: </h3>
-                        <form onSubmit={handleSubmit}>
-                            <label style={{ display: 'block', marginBottom: '15px' }}>
-                                Description
-                                <textarea
-                                    name="description"
-                                    value={descSubmit}
-                                    onChange={(e) => setDescSubmit(e.target.value)}
-                                    style={{ display: 'block', width: '100%', marginTop: '5px', minHeight: '80px', padding: '8px' }}
-                                />
-                            </label>
-
-                            <label style={{ display: 'block', marginBottom: '10px' }}>
-                                Attach Files
-                                <input
-                                    type="file"
-                                    accept=".pdf"
-                                    multiple
-                                    onChange={handleFileChange}
-                                    style={{ display: 'block', marginTop: '5px' }}
-                                />
-                            </label>
-
-                            {/* Preview selected files before upload */}
-                            {fileSubmit.length > 0 && (
-                                <div style={{ marginBottom: '15px' }}>
-                                    <p style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>Selected Files ({fileSubmit.length}):</p>
-                                    {fileSubmit.map((file) => (
-                                        <div
-                                            key={file.id}
-                                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f1f1f1', padding: '8px 12px', borderRadius: '4px', marginTop: '5px' }}
+                    {/* Helpful files list */}
+                    <div className="mt-4 pt-4 border-t border-gray-800">
+                        <p className="text-xs uppercase tracking-wider text-gray-400 font-semibold mb-2">Helpful files:</p>
+                        {task.file_path && task.file_path.length > 0 ? (
+                            <div className="space-y-2">
+                                {task.file_path.map((path, index) => (
+                                    <div
+                                        key={index}
+                                        className="bg-zinc-900/60 border border-gray-800 p-3 rounded-lg transition-all hover:border-gray-700"
+                                    >
+                                        <a
+                                            href={`http://localhost:3000${path}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center text-sm text-gray-300 hover:text-emerald-300 transition-colors"
                                         >
-                                            <span>📄 {file.name}</span>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemoveFile(file.id)}
-                                                style={{ background: '#ff4d4d', color: 'white', border: 'none', padding: '2px 6px', borderRadius: '3px', cursor: 'pointer' }}
-                                            >
-                                                Remove
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            <button type="submit" style={{ padding: '8px 16px', background: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                                Submit work
-                            </button>
-                        </form>
-                    </>
-                ) : (
-                    <div>
-                        <h3>Submission successful</h3>
-                        <p>Your submission info:</p>
-                        {submitRes && (
-                            <div style={{ background: '#f9f9f9', padding: '15px', borderRadius: '8px', border: '1px solid #ddd', marginTop: '10px' }}>
-                                <p><strong>Student ID:</strong> {submitRes.student_id}</p>
-                                <p><strong>Description:</strong> {submitRes.submission_text || "No text provided."}</p>
-
-                                <div style={{ margin: '15px 0' }}>
-                                    <strong>Your Attached Files:</strong>
-                                    {submitRes.file_url && submitRes.file_url.length > 0 ? (
-                                        submitRes.file_url.map((url, index) => (
-                                            <div
-                                                key={index}
-                                                style={{ marginTop: '8px', background: '#fff', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-                                            >
-                                                <p style={{ margin: '0 0 4px 0' }}>📄 {submitRes.file_name?.[index] || `File ${index + 1}`}</p>
-                                                <a
-                                                    href={`http://localhost:3000${url}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    style={{ color: '#007bff' }}
-                                                >
-                                                    Download / View File
-                                                </a>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p style={{ color: '#777', fontSize: '0.9rem' }}>No files attached.</p>
-                                    )}
-                                </div>
-
-                                {submitRes.grade !== null && submitRes.grade !== undefined ? (
-                                    <p>Your grade: <strong>{submitRes.grade}</strong></p>
-                                ) : (
-                                    <div style={{ marginTop: '15px' }}>
-                                        <p>Your grade: <span style={{ opacity: "0.8" }}>not yet published</span></p>
-                                        <button
-                                            onClick={() => setIsSubmitted(false)}
-                                            style={{ padding: '6px 12px', background: '#ffc107', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                                        >
-                                            Edit submission
-                                        </button>
+                                            📄 <span className="ml-2">{task.file_name?.[index] || `File ${index + 1}`}</span>
+                                        </a>
                                     </div>
-                                )}
+                                ))}
                             </div>
+                        ) : (
+                            <p className="text-gray-500 text-xs italic">No helpful files attached.</p>
                         )}
                     </div>
-                )}
+
+                    <div className="text-xs text-gray-400 border-t border-gray-800 pt-3 mt-4 flex items-center justify-left gap-2">
+                        <span>Due Date:</span>
+                        <span className="text-gray-300 font-medium">{new Date(task.due_date).toLocaleString()}</span>
+                    </div>
+                </div>
+
+                {/* Submission Form / Status Card */}
+                <div className="bg-zinc-800/60 max-w-md mx-auto p-6 rounded-xl border border-zinc-700/50 transition-all duration-300 hover:border-emerald-500/50">
+                    {!isSubmitted ? (
+                        <>
+                            <h3 className="feature-title">Submit your work</h3>
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">
+                                        Description
+                                    </label>
+                                    <textarea
+                                        name="description"
+                                        value={descSubmit}
+                                        onChange={(e) => setDescSubmit(e.target.value)}
+                                        className="w-full mt-1 min-h-[90px] p-3 text-sm bg-zinc-900/60 border border-gray-800 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                                        placeholder="Add notes or text for your submission..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className=" block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">
+                                        Attach Files
+                                    </label>
+                                    <input
+                                        type="file"
+                                        accept=".pdf"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        className="mt-1 w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-500/10 file:text-emerald-400 hover:file:bg-emerald-500/20 cursor-pointer"
+                                    />
+                                </div>
+
+                                {/* Preview selected files before upload */}
+                                {fileSubmit.length > 0 && (
+                                    <div className="space-y-2">
+                                        <p className="text-xs font-semibold text-gray-400">Selected Files ({fileSubmit.length}):</p>
+                                        {fileSubmit.map((file) => (
+                                            <div
+                                                key={file.id}
+                                                className="flex justify-between items-center bg-zinc-900/60 border border-gray-800 p-2.5 rounded-lg text-sm"
+                                            >
+                                                <span className="text-gray-300 truncate mr-2">📄 {file.name}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveFile(file.id)}
+                                                    className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-2 py-1 rounded text-xs transition-colors cursor-pointer"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <button
+                                    type="submit"
+                                    className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm rounded-lg transition-colors shadow-md cursor-pointer"
+                                >
+                                    Submit work
+                                </button>
+                            </form>
+                        </>
+                    ) : (
+                        <div className="space-y-4">
+                            <div>
+                                <h3 className="text-lg font-semibold text-white mb-1">Submission Successful</h3>
+                                <p className="text-xs text-gray-400">Your recorded submission info:</p>
+                            </div>
+
+                            {submitRes && (
+                                <div className="space-y-3">
+                                    <div className="bg-zinc-900/60 border border-gray-800 p-4 rounded-lg text-sm space-y-2">
+                                        <p className="text-gray-300"><strong className="text-gray-400">Student ID:</strong> {submitRes.student_id}</p>
+                                        <p className="text-gray-300"><strong className="text-gray-400">Description:</strong> {submitRes.submission_text || "No text provided."}</p>
+
+                                        <div className="pt-2 border-t border-gray-800">
+                                            <strong className="text-xs uppercase tracking-wider text-gray-400 font-semibold block mb-2">Your Attached Files:</strong>
+                                            {submitRes.file_url && submitRes.file_url.length > 0 ? (
+                                                <div className="space-y-2">
+                                                    {submitRes.file_url.map((url, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="bg-gray-950/50 border border-gray-800/60 p-2.5 rounded-lg"
+                                                        >
+                                                            <p className="text-xs text-gray-300 mb-1">📄 {submitRes.file_name?.[index] || `File ${index + 1}`}</p>
+                                                            <a
+                                                                href={`http://localhost:3000${url}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors inline-flex items-center"
+                                                            >
+                                                                Download / View File →
+                                                            </a>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-gray-500 text-xs italic">No files attached.</p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {submitRes.grade !== null && submitRes.grade !== undefined ? (
+                                        <div className="bg-zinc-900/60 border border-gray-800 p-3 rounded-lg text-sm">
+                                            <span className="text-gray-400">Your grade:</span> <strong className="text-emerald-400 ml-1">{submitRes.grade}</strong>
+                                        </div>
+                                    ) : (
+                                        <div className="pt-2 flex items-center justify-between">
+                                            <span className="text-xs text-gray-400 italic">Grade not yet published</span>
+                                            <button
+                                                onClick={() => setIsSubmitted(false)}
+                                                className="py-1.5 px-3 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-medium rounded-lg transition-colors cursor-pointer"
+                                            >
+                                                Edit submission
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
-        </>
+        </div>
     );
 }
 

@@ -9,7 +9,6 @@ function CourseContent() {
     const {id} = useParams();
 
     useEffect(() => {
-        // Single fetch now pulls course details, sections (with files), and tasks
         fetch(`http://localhost:3000/student/courses/${id}`, {
             headers: { "Authorization": `Bearer ${localStorage.getItem('token')}` }
         })
@@ -22,56 +21,100 @@ function CourseContent() {
             .catch(err => console.error("Error fetching course content:", err));
     }, [id]);
 
-    if (!course) return <p>Loading course details...</p>;
+    if (!course) {
+        return (
+            <div className="min-h-screen bg-gray-950 text-gray-300 flex items-center justify-center">
+                <p className="text-lg animate-pulse">Loading course details...</p>
+            </div>
+        );
+    }
 
     return (
-        <>
-            <Link to="/student-dashboard">← Back to Dashboard</Link>
-            <div>
-                <h1>{course.title}</h1>
-                <p>{course.description}</p>
+        <div className="min-h-screen text-gray-100 p-6 md:p-10 font-sans">
+            <Link
+                to="/student-dashboard"
+                className="inline-flex items-center text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors mb-6"
+            >
+                ← Back to Dashboard
+            </Link>
 
-                <h2>Course Materials</h2>
-                {sections.length === 0 ? (
-                    <p>No sections available for this course yet.</p>
-                ) : (
-                    sections.map((section) => (
-                        <div key={section.id} style={{ marginBottom: '20px', border: '1px solid #ccc', padding: '10px', borderRadius: '5px' }}>
-                            <h3>{section.title}</h3>
-                            {section.files.length === 0 ? (
-                                <p style={{ fontStyle: 'italic', color: '#666' }}>No files uploaded in this section.</p>
-                            ) : (
-                                <ul>
-                                    {section.files.map((file) => (
-                                        <li key={file.id}>
-                                            <a href={`http://localhost:3000${file.file_path}`} target="_blank" rel="noopener noreferrer">
-                                                {file.name}
-                                            </a>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-                    ))
-                )}
+            <div className="max-w-5xl mx-auto space-y-8">
+                <div className="bg-zinc-800/60 max-w-md mx-auto p-6 rounded-xl border border-zinc-700/50 transition-all duration-300 hover:border-emerald-500/50 hover:-translate-y-1">
+                    <h1 className="text-2xl font-bold text-white mb-2">{course.title}</h1>
+                    <p className="text-gray-400 text-sm leading-relaxed">{course.description}</p>
+                </div>
+
+                <div className="feature-card grid grid-cols-[auto] place-items-center">
+                    <h2 className="course-title">
+                        Course Materials
+                    </h2>
+
+                    {sections.length === 0 ? (
+                        <p className="text-gray-500 italic">No sections available for this course yet.</p>
+                    ) : (
+                        sections.map((section) => (
+                            <div
+                                key={section.id}
+                                className="bg-zinc-900/60 border border-gray-800 w-[auto] rounded-xl p-5 shadow-md transition-all hover:border-gray-700"
+                            >
+                                <h3 className="text-lg text-[#d4d4d8] font-medium text-white transition-colors block mb-2">{section.title}</h3>
+
+                                {section.files.length === 0 ? (
+                                    <p className="text-sm italic text-gray-500">No files uploaded in this section.</p>
+                                ) : (
+                                    <ul className="space-y-2">
+                                        {section.files.map((file) => (
+                                            <li key={file.id}>
+                                                <a
+                                                    href={`http://localhost:3000${file.file_path}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center justify-center text-sm text-gray-300 hover:text-emerald-300 transition-colors bg-gray-950/50 px-3 py-2 rounded-lg border border-gray-800/60 w-full hover:border-emerald-500/30"
+                                                >
+                                                    📄 <span className="ml-2">{file.name}</span>
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                <div className="bg-zinc-800/60 mx-auto max-w-md max-h-sm p-6 rounded-xl border border-zinc-700/50 transition-all duration-300 hover:border-emerald-500/50 hover:-translate-y-1">
+                    <h3 className="course-title">
+                        Tasks
+                    </h3>
+
+                    {tasks.length === 0 ? (
+                        <p className="text-gray-500 italic">No tasks available.</p>
+                    ) : (
+                        <ul className="grid gap-4 sm:grid-cols-[auto] place-items-center">
+                            {tasks.map((task) => (
+                                <li
+                                    key={task.id}
+                                    className="bg-zinc-900/60 border border-gray-800 rounded-xl p-4 shadow-md flex flex-col justify-between transition-all hover:border-gray-700"
+                                >
+                                    <div>
+                                        <Link
+                                            to={`./task/${task.id}`}
+                                            className="text-md font-medium text-white hover:text-emerald-400 transition-colors block mb-2"
+                                        >
+                                            {task.title}
+                                        </Link>
+                                    </div>
+                                    <div className="text-xs text-gray-400 border-t border-gray-800/80 pt-3 mt-3 flex items-center justify-between">
+                                        <span>Due: &nbsp;</span>
+                                        <span className="text-gray-300 font-medium">{new Date(task.due_date).toLocaleString()}</span>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
             </div>
-            <div>
-                <h3>Tasks</h3>
-                {tasks.length === 0 ? (
-                    <p>No tasks available.</p>
-                ) : (
-                    <ul>
-                        {tasks.map((task) => (
-                            <li key={task.id} style={{ marginBottom: '15px' }}>
-                                <Link to={`./task/${task.id}`}>{task.title}</Link>
-                                <br />
-                                <small>Due: {new Date(task.due_date).toLocaleString()}</small>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
-        </>
+        </div>
     );
 }
 
