@@ -142,9 +142,11 @@ function ModifyCourse() {
         formData.append('titleTask', titleTask);
         formData.append('descTask', descTask);
         formData.append('dueDateTask', dueDateTask);
-        taskFiles.forEach((file) => {
-            formData.append('taskFiles', file);
-        });
+        if (taskFiles) {
+            taskFiles.forEach((file) => {
+                formData.append('taskFiles', file);
+            });
+        }
 
         try {
             const res = await fetch(`http://localhost:3000/courses/modify/${id}/tasks`, {
@@ -162,13 +164,35 @@ function ModifyCourse() {
             setTitleTask('');
             setDescTask('');
             setDueDateTask('');
-            setTaskFiles(null);
+            setTaskFiles([]);
             alert('Task added successfully!');
         }
         catch(err) {
             setError(err.message);
         }
-    }
+    };
+
+    const handleDeleteTask = async (taskId) => {
+        if (!window.confirm("Are you sure you want to delete this task?")) return;
+
+        try {
+            const res = await fetch(`http://localhost:3000/tasks/${taskId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to delete task');
+            }
+
+            setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+            alert('Task deleted successfully!');
+        } catch (err) {
+            setError(err.message);
+        }
+    };
 
     const handleRemoval = async (fileId) => {
         if (!window.confirm("Are you sure you want to delete this file?")) return;
@@ -337,12 +361,21 @@ function ModifyCourse() {
                                             Due: {task.due_date ? new Date(task.due_date).toLocaleString() : 'No due date'}
                                         </p>
                                     </div>
-                                    <Link
-                                        to={`/tasks/${task.id}/submissions`}
-                                        style={{ padding: '6px 12px', background: '#007bff', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}
-                                    >
-                                        View Submissions
-                                    </Link>
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                        <Link
+                                            to={`/tasks/${task.id}/submissions`}
+                                            style={{ padding: '6px 12px', background: '#007bff', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}
+                                        >
+                                            View Submissions
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDeleteTask(task.id)}
+                                            style={{ padding: '6px 12px', background: '#dc3545', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '4px', fontSize: '14px' }}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 </li>
                             ))}
                         </ul>
@@ -365,7 +398,7 @@ function ModifyCourse() {
                     </label>
                     <label>
                         Task File:
-                        <input type="file" multiple onChange={e => setTaskFiles(Array.from(e.target.files))} style={{ display: 'block', marginBottom: '10px' }} />
+                        <input type="file" accept=".pdf" multiple onChange={e => setTaskFiles(Array.from(e.target.files))} style={{ display: 'block', marginBottom: '10px' }} />
                     </label>
                     <button type="button" onClick={(e) => handleTask(e)} style={{ padding: '8px 12px', background: '#17a2b8', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>Add new task</button>
                 </div>

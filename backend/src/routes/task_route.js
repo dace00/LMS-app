@@ -60,6 +60,81 @@ router.get('/tasks/:taskId', Verify, async (req, res) => {
     }
 });
 
+router.put('/tasks/:taskId/submit', Verify, uploadSubmit.array("subm-files"), async (req, res) => {
+    const { taskId } = req.params;
+    const { descSubmit, grade } = req.body;
+    const userId = req.userId;
+
+    // Check if new files were uploaded; if so, map their paths and names
+    const filePaths = req.files && req.files.length > 0
+        ? req.files.map(file => `/submitUploads/${file.filename}`)
+        : null;
+
+    const fileNames = req.files && req.files.length > 0
+        ? req.files.map(file => file.originalname)
+        : null;
+
+    try {
+        // First, check if a submission already exists for this user and task
+        const existingSub = await pool.query(
+            'SELECT * FROM submissions WHERE task_id = $1 AND student_id = $2',
+            [taskId, userId]
+        );
+
+        if (existingSub.rows.length === 0) {
+            return res.status(404).json({ error: "No existing submission found to update." });
+        }
+
+        // If new files were provided, update text AND files. If no new files were uploaded, keep the old files intact.
+        let updateQuery;
+        let queryParams;
+
+        if (filePaths && filePaths.length > 0) {
+            updateQuery = `
+                UPDATE submissions 
+                SET submission_text = $1, file_url = $2, file_name = $3 
+                WHERE task_id = $4 AND student_id = $5
+            `;
+            queryParams = [descSubmit, filePaths, fileNames, taskId, userId];
+        } else {
+            updateQuery = `
+                UPDATE submissions 
+                SET submission_text = $1 
+                WHERE task_id = $2 AND student_id = $3
+            `;
+            queryParams = [descSubmit, taskId, userId];
+        }
+
+        await pool.query(updateQuery, queryParams);
+
+        res.status(200).json({ message: "Successfully updated submission work" });
+    }
+    catch (error) {
+        console.log(error);
+        res.status(400).json({ error: "Unable to update submission" });
+    }
+});
+
+router.delete('/tasks/:taskId', Verify, async (req, res) => {
+    const { taskId } = req.params;
+
+    try {
+        const result = await pool.query(
+            'DELETE FROM tasks WHERE id = $1 RETURNING *',
+            [taskId]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Task not found' });
+        }
+
+        res.json({ message: 'Task deleted successfully!' });
+    } catch (err) {
+        console.error('Task deletion error:', err.message);
+        res.status(500).json({ error: 'Server error while deleting task' });
+    }
+});
+
 router.post('/tasks/:taskId/submit', Verify, uploadSubmit.array("subm-files"), async (req, res) => {
     const { taskId } = req.params;
     const { descSubmit, grade } = req.body;

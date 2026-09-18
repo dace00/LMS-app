@@ -45,6 +45,23 @@
     @apply w-full bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-semibold py-2.5 rounded-lg transition cursor-pointer mt-2;
 }
 
+.select-option {
+    @apply bg-zinc-900/60 border border-gray-800 rounded-xl hover:border-emerald-500/30;
+}
+
+.inner-div {
+@apply bg-zinc-900 border border-gray-800 hover:border-gray-700;
+}
+
+.inner-inner-div {
+    @apply text-gray-300 hover:text-emerald-300 transition-colors bg-gray-950/50 border-gray-800/60 hover:border-emerald-500/30;
+}
+
+.main-div {
+    @apply bg-zinc-800/60 p-6 rounded-xl border border-zinc-700/50
+    hover:border-emerald-500/30 transition-all hover:-translate-y-1 duration-200;
+}
+
 body {
     color: #d4d4d8;
 }
