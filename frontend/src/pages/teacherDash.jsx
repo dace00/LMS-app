@@ -226,7 +226,10 @@ function Teacher_dash() {
                                     value={title}
                                     onChange={e => setTitle(e.target.value)}
                                     required
-                                    className="w-full p-3 text-sm bg-zinc-900/60 border border-zinc-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500 transition-colors"
+                                    className="w-full mt-1 min-h-[90px] p-3 text-sm bg-zinc-900 border
+                                     border-gray-800 rounded-lg text-gray-100 focus:outline-none
+                                     hover:border-gray-700 focus:border-2 focus:border-gray-700
+                                     transition-all duration-100"
                                 />
                             </div>
                             <div>
@@ -236,7 +239,10 @@ function Teacher_dash() {
                                     value={description}
                                     onChange={e => setDescription(e.target.value)}
                                     required
-                                    className="w-full min-h-[100px] p-3 text-sm bg-zinc-900/60 border border-zinc-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500 transition-colors"
+                                    className="w-full mt-1 min-h-[90px] p-7 text-sm bg-zinc-900 border
+                                     border-gray-800 rounded-lg text-gray-100 focus:outline-none
+                                     hover:border-gray-700 focus:border-2 focus:border-gray-700
+                                     transition-all duration-100"
                                 />
                             </div>
                             <div>

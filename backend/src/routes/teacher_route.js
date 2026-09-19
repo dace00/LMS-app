@@ -142,6 +142,62 @@ router.post("/student/courses/modify/:id", Verify, upload.array('course-files'),
     }
 });
 
+router.post("/student/courses/:id/sections", Verify, upload.array('course-files'), async (req, res) => {
+    const { id } = req.params;
+    const { section_id, section_title } = req.body;
+    const instructorId = req.userId;
+
+    try {
+        // make sure the course exists and belongs to this teacher
+        const course = await pool.query(
+            'SELECT id FROM courses WHERE id = $1 AND instructor = $2',
+            [id, instructorId]
+        );
+        if (course.rowCount === 0) {
+            return res.status(404).json({ error: 'Course not found' });
+        }
+
+        let section;
+
+        if (section_title && section_title.trim()) {
+            // create a new section
+            const newSec = await pool.query(
+                'INSERT INTO sections (course_id, title) VALUES ($1, $2) RETURNING *',
+                [id, section_title.trim()]
+            );
+            section = newSec.rows[0];
+        } else if (section_id) {
+            // use an existing section (must belong to this course)
+            const existing = await pool.query(
+                'SELECT * FROM sections WHERE id = $1 AND course_id = $2',
+                [section_id, id]
+            );
+            if (existing.rowCount === 0) {
+                return res.status(404).json({ error: 'Section not found' });
+            }
+            section = existing.rows[0];
+        } else {
+            return res.status(400).json({ error: 'Provide a section title or select an existing section' });
+        }
+
+        const newFiles = [];
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const fileQuery = await pool.query(
+                    'INSERT INTO files (name, file_path, course_id, section_id) VALUES ($1, $2, $3, $4) RETURNING *',
+                    [file.originalname, `/uploads/${file.filename}`, id, section.id]
+                );
+                newFiles.push(fileQuery.rows[0]);
+            }
+        }
+
+        res.status(201).json({ section: { ...section, files: newFiles } });
+    } catch (error) {
+        console.error('Add section error:', error.message);
+        res.status(500).json({ error: 'Server error while adding section' });
+    }
+});
+
 router.put('/teacher/sections/:sectionId', Verify, async (req, res) => {
     const { sectionId } = req.params;
     const { title } = req.body;

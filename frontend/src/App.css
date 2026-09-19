@@ -50,7 +50,7 @@
 }
 
 .inner-div {
-@apply bg-zinc-900 border border-gray-800 hover:border-gray-700;
+@apply bg-zinc-900 border border-1 border-gray-800 hover:border-gray-700;
 }
 
 .inner-inner-div {
@@ -60,6 +60,13 @@
 .main-div {
     @apply bg-zinc-800/60 p-6 rounded-xl border border-zinc-700/50
     hover:border-emerald-500/30 transition-all hover:-translate-y-1 duration-200;
+}
+
+.inner-div-form {
+    @apply w-full mt-1 min-h-[90px] p-3 text-sm bg-zinc-900 border
+    border-gray-800 rounded-lg text-gray-100 focus:outline-none
+    hover:border-gray-700 focus:border-2 focus:border-gray-700
+    transition-all duration-100
 }
 
 body {

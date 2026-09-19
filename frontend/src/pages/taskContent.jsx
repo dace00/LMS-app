@@ -99,7 +99,7 @@ const handleRemoveFile = (id) => {
             window.location.reload();
         }
         catch (err) {
-            setError(err.message);
+            setError(err.message || "Uh Oh! Something went wrong, please try again later!");
         }
     };
     
@@ -202,7 +202,10 @@ return (
                                     name="description"
                                     value={descSubmit}
                                     onChange={(e) => setDescSubmit(e.target.value)}
-                                    className="w-full mt-1 min-h-[90px] p-3 text-sm bg-gray-950/50 border border-gray-800 rounded-lg text-gray-100 focus:outline-none hover:border-emerald-500/30 focus:border-2 focus:border-emerald-500/30 transition-all duration-100"
+                                    className="w-full mt-1 min-h-[90px] p-3 text-sm bg-gray-950/50 border
+                                     border-gray-800 rounded-lg text-gray-100 focus:outline-none
+                                     hover:border-emerald-500/30 focus:border-2 focus:border-emerald-500/30
+                                     transition-all duration-100"
                                     placeholder="Add notes or text for your submission..."
                                 />
                             </div>
