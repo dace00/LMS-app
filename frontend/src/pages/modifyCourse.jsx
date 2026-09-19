@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate, Link} from "react-router-dom";
 
 function ModifyCourse() {
     const [course, setCourse] = useState({ title: '', description: '' });
@@ -15,7 +15,9 @@ function ModifyCourse() {
     const [dueDateTask, setDueDateTask] = useState('');
     const [taskFiles, setTaskFiles] = useState([]);
     const [error, setError] = useState('');
+    const [fileInputKey, setFileInputKey] = useState(0);
     const { id } = useParams();
+    const backup = useRef(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -88,6 +90,58 @@ function ModifyCourse() {
         }
     };
 
+    // Adds a new section and/or uploads a file to a section, without saving the course
+    const handleAddSection = async () => {
+        if (!newSectionTitle.trim() && !selectedSectionId) {
+            setError('Enter a new section title or select an existing section.');
+            return;
+        }
+        if (!newSectionTitle.trim() && !pendingFile) {
+            setError('Choose a file to upload to the selected section.');
+            return;
+        }
+
+        const formData = new FormData();
+        if (newSectionTitle.trim()) {
+            formData.append('section_title', newSectionTitle.trim());
+        } else {
+            formData.append('section_id', selectedSectionId);
+        }
+        if (pendingFile) {
+            formData.append('course-files', pendingFile);
+        }
+
+        try {
+            const res = await fetch(`http://localhost:3000/student/courses/${id}/sections`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                body: formData
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to add section');
+            }
+
+            const updated = data.section;
+            setSections(prev =>
+                prev.some(s => s.id === updated.id)
+                    ? prev.map(s => s.id === updated.id
+                        ? { ...s, files: [...(s.files || []), ...updated.files] }
+                        : s)
+                    : [...prev, updated]
+            );
+
+            setNewSectionTitle('');
+            setSelectedSectionId('');
+            setPendingFile(null);
+            setFileInputKey(k => k + 1); // clears the file input
+            setError('');
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
     const handleUpdateSectionName = async (sectionId) => {
         if (!editingSectionTitle.trim()) return;
 
@@ -138,6 +192,9 @@ function ModifyCourse() {
 
     const handleTask = async (e) => {
         e.preventDefault();
+
+        if (!backup.current.reportValidity()) return;
+
         const formData = new FormData();
         formData.append('titleTask', titleTask);
         formData.append('descTask', descTask);
@@ -222,62 +279,73 @@ function ModifyCourse() {
         }
     };
 
-    if (!course) return <p>Loading course details...</p>;
+    if (!course) return (
+        <div className="min-h-screen bg-zinc-900 text-zinc-400 flex items-center justify-center">
+            <p>Loading course details...</p>
+        </div>
+    );
 
     return (
-        <div style={{ padding: '30px', maxWidth: '600px', margin: 'auto' }}>
-            <h2>Modify Course</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+        <div className="min-h-screen bg-zinc-900 p-8 max-w-3xl mx-auto w-full font-sans text-zinc-100">
+            <h2 className="text-2xl font-bold text-white ">Modify Course</h2>
+            {error && <p className="text-sm text-red-400 bg-red-950/40 border border-red-900/50 p-3 rounded-lg mb-4">{error}</p>}
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <label>
-                    Title:
-                    <input
-                        type="text"
-                        name="title"
-                        value={course.title || ''}
-                        onChange={handleChange}
-                        required
-                        style={{ display: 'block', padding: '10px', width: '100%', boxSizing: 'border-box' }}
-                    />
-                </label>
-                <label>
-                    Description:
-                    <textarea
-                        name="description"
-                        value={course.description || ''}
-                        onChange={handleChange}
-                        required
-                        style={{ display: 'block', padding: '10px', height: '100px', width: '100%', boxSizing: 'border-box' }}
-                    />
-                </label>
+            <form onSubmit={handleSubmit} className="space-y-6 mt-7">
+                <div className="flex flex-col main-div gap-4">
+                    <h3 className="text-lg font-semibold text-white ">General Information</h3>
+                    <div className="flex flex-col gap-1">
+                        <label className="block text-xs text-left pl-2 uppercase tracking-wider text-gray-400 font-semibold mb-1">Title</label>
+                        <input
+                            type="text"
+                            name="title"
+                            value={course.title || ''}
+                            onChange={handleChange}
+                            required
+                            className="w-full p-3 w-full mt-1 min-h-0 p-3 text-sm bg-zinc-900 border
+                                    border-gray-800 rounded-lg text-gray-100 focus:outline-none
+                                    hover:border-gray-700 focus:border-2 focus:border-gray-700
+                                    transition-all duration-100 text-sm rounded-lg text-gray-100 focus:outline-none transition-colors"
+                        />
+                    </div>
 
-                <div>
-                    <h4>Manage Sections:</h4>
+                    <div className="flex flex-col gap-1">
+                        <label className="block text-left pl-2 text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1">Description</label>
+                        <textarea
+                            name="description"
+                            value={course.description || ''}
+                            onChange={handleChange}
+                            required
+                            className="w-full min-h-[100px] inner-div-form p-3 text-sm rounded-lg text-gray-100 focus:outline-none transition-colors"
+                        />
+                    </div>
+                </div>
+               
+                <div className="main-div p-5 rounded-xl space-y-4">
+                    <h4 className="text-lg font-semibold text-white">Manage Sections</h4>
                     {sections.length === 0 ? (
-                        <p style={{ color: '#777' }}>No sections created yet.</p>
+                        <p className="text-gray-400 text-sm italic">No sections created yet.</p>
                     ) : (
                         sections.map(section => (
-                            <div key={section.id} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px', borderRadius: '4px', background: '#fafafa' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <div key={section.id} className="inner-div p-4 rounded-lg space-y-3">
+                                <div className="flex justify-between items-center">
                                     {editingSectionId === section.id ? (
-                                        <div style={{ display: 'flex', gap: '5px', flex: 1, marginRight: '10px' }}>
+                                        <div className="flex gap-2 flex-1 mr-4">
                                             <input
                                                 type="text"
                                                 value={editingSectionTitle}
                                                 onChange={(e) => setEditingSectionTitle(e.target.value)}
-                                                style={{ padding: '4px', flex: 1 }}
+                                                className="p-1.5 text-sm bg-zinc-800 border border-zinc-700 rounded text-white flex-1 focus:outline-none focus:border-emerald-500"
                                             />
-                                            <button type="button" onClick={() => handleUpdateSectionName(section.id)} style={{ background: '#28a745', color: 'white', border: 'none', padding: '4px 8px', cursor: 'pointer', borderRadius: '4px' }}>Save</button>
-                                            <button type="button" onClick={() => setEditingSectionId(null)} style={{ background: '#6c757d', color: 'white', border: 'none', padding: '4px 8px', cursor: 'pointer', borderRadius: '4px' }}>Cancel</button>
+                                            <button type="button" onClick={() => handleUpdateSectionName(section.id)} className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded transition-colors cursor-pointer">Save</button>
+                                            <button type="button" onClick={() => setEditingSectionId(null)} className="bg-zinc-700 hover:bg-zinc-600 text-white text-xs px-3 py-1.5 rounded transition-colors cursor-pointer">Cancel</button>
                                         </div>
                                     ) : (
-                                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                            <strong>{section.title}</strong>
+                                        <div className="flex gap-3 items-center">
+                                            <strong className="text-white text-sm">{section.title}</strong>
                                             <button
                                                 type="button"
                                                 onClick={() => { setEditingSectionId(section.id); setEditingSectionTitle(section.title); }}
-                                                style={{ background: '#ffc107', border: 'none', padding: '3px 6px', cursor: 'pointer', borderRadius: '4px', fontSize: '12px' }}
+                                                className="bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 border border-violet-500/30 px-2.5 py-1 rounded text-xs transition-colors cursor-pointer"
                                             >
                                                 Modify Name
                                             </button>
@@ -286,24 +354,24 @@ function ModifyCourse() {
                                     <button
                                         type="button"
                                         onClick={() => handleDeleteSection(section.id)}
-                                        style={{ background: '#dc3545', color: 'white', border: 'none', padding: '4px 8px', cursor: 'pointer', borderRadius: '4px', fontSize: '12px' }}
+                                        className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-2.5 py-1 rounded text-xs transition-colors cursor-pointer"
                                     >
                                         Clear Section
                                     </button>
                                 </div>
-                                <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                                <ul className="space-y-2 pt-2 border-t border-zinc-800">
                                     {section.files.length === 0 ? (
-                                        <li style={{ color: '#777', fontSize: '13px' }}>No files in this section.</li>
+                                        <li className="text-gray-500 text-xs italic">No files in this section.</li>
                                     ) : (
                                         section.files.map((file) => (
-                                            <li key={file.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                                <a href={`http://localhost:3000${file.file_path}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '14px' }}>
+                                            <li key={file.id} className="flex justify-between items-center gap-3 inner-inner-div p-2 rounded-xl border ">
+                                                <a href={`http://localhost:3000${file.file_path}`} target="_blank" rel="noopener noreferrer" className="flex-1 text-sm text-gray-300 hover:text-emerald-300 transition-colors">
                                                     {file.name || 'Course Document'}
                                                 </a>
                                                 <button
                                                     type="button"
                                                     onClick={() => handleRemoval(file.id)}
-                                                    style={{ background: '#e03043', color: 'white', border: 'none', padding: '2px 6px', cursor: 'pointer', borderRadius: '4px', fontSize: '11px' }}
+                                                    className="bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-600/30 text-[11px] px-2 py-1 rounded transition-colors cursor-pointer"
                                                 >
                                                     Remove file
                                                 </button>
@@ -316,97 +384,154 @@ function ModifyCourse() {
                     )}
                 </div>
 
-                <div style={{ border: '1px dashed #ccc', padding: '15px', borderRadius: '4px' }}>
-                    <h4>Add New File / Section</h4>
-                    <label style={{ display: 'block', marginBottom: '10px' }}>
-                        Select Existing Section:
+                
+                <div className="main-div  p-5 rounded-xl space-y-4">
+                    <h4 className="text-lg font-semibold text-white">Add New File / Section</h4>
+                    <div>
+                        <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Select Existing Section</label>
                         <select
                             value={selectedSectionId}
                             onChange={(e) => { setSelectedSectionId(e.target.value); setNewSectionTitle(''); }}
-                            style={{ display: 'block', padding: '8px', width: '100%', boxSizing: 'border-box' }}
+                            className="w-full p-2.5 text-sm  bg-zinc-900 border-1 border-gray-800 hover:border-gray-700 cursor-pointer rounded-xl focus:outline-none transition-all duration-200"
                         >
                             <option value="">-- Choose Section --</option>
                             {sections.map(sec => (
                                 <option key={sec.id} value={sec.id}>{sec.title}</option>
                             ))}
                         </select>
-                    </label>
-                    <label style={{ display: 'block', marginBottom: '10px' }}>
-                        Or Create New Section Title:
+                    </div>
+                    <div>
+                        <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Or Create New Section Title</label>
                         <input
                             type="text"
                             value={newSectionTitle}
                             onChange={(e) => { setNewSectionTitle(e.target.value); setSelectedSectionId(''); }}
                             placeholder="e.g. Week 2 Materials"
-                            style={{ display: 'block', padding: '8px', width: '100%', boxSizing: 'border-box' }}
+                            className="w-full mt-1 p-3 text-sm bg-zinc-900 border border-gray-800 rounded-lg text-gray-100 focus:outline-none hover:border-gray-700 focus:border-gray-600 focus:ring-1 focus:ring-gray-600 transition-all duration-100"
                         />
-                    </label>
-                    <label>
-                        Upload File:
-                        <input type="file" accept=".pdf" onChange={handleFileChange} style={{ display: 'block', marginTop: '5px' }} />
-                    </label>
+                    </div>
+                    <div>
+                        <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Upload File</label>
+                        <input
+                            key={fileInputKey}
+                            type="file"
+                            accept=".pdf"
+                            onChange={handleFileChange}
+                            className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-500/10 file:cursor-pointer file:text-emerald-400 hover:file:bg-emerald-500/20 cursor-pointer"
+                        />
+                    </div>
+
+                    
+                    <button
+                        type="button"
+                        onClick={handleAddSection}
+                        className="w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm rounded-lg transition-colors cursor-pointer"
+                    >
+                        Add Section / Upload File
+                    </button>
                 </div>
 
-                <div style={{ marginTop: '20px', borderTop: '1px solid #ccc', paddingTop: '20px' }}>
-                    <h3>Course Tasks & Submissions</h3>
+              
+                <div className="pt-4 border-t border-zinc-700/50 space-y-4">
+                    <h3 className="text-xl font-semibold text-white">Course Tasks & Submissions</h3>
                     {tasks.length === 0 ? (
-                        <p style={{ color: '#777' }}>No tasks created yet.</p>
+                        <p className="text-gray-400 text-sm italic">No tasks created yet.</p>
                     ) : (
-                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                        <div className="main-div space-y-3">
                             {tasks.map((task) => (
-                                <li key={task.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f9f9f9', padding: '10px', marginBottom: '8px', borderRadius: '4px' }}>
+                                <div key={task.id} className="bg-zinc-800/60 border border-zinc-700/50 p-4 rounded-lg flex justify-between items-center">
                                     <div>
-                                        <strong>{task.title}</strong>
-                                        <p style={{ fontSize: '12px', color: '#555', margin: '4px 0 0 0' }}>
+                                        <strong className="text-white text-sm">{task.title}</strong>
+                                        <p className="text-xs text-gray-400 mt-1">
                                             Due: {task.due_date ? new Date(task.due_date).toLocaleString() : 'No due date'}
                                         </p>
                                     </div>
-                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    <div className="flex gap-2 items-center">
                                         <Link
                                             to={`/tasks/${task.id}/submissions`}
-                                            style={{ padding: '6px 12px', background: '#007bff', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}
+                                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors shadow"
                                         >
                                             View Submissions
                                         </Link>
                                         <button
                                             type="button"
                                             onClick={() => handleDeleteTask(task.id)}
-                                            style={{ padding: '6px 12px', background: '#dc3545', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '4px', fontSize: '14px' }}
+                                            className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-600/30 text-xs font-medium rounded-lg transition-colors cursor-pointer"
                                         >
                                             Delete
                                         </button>
                                     </div>
-                                </li>
+                                </div>
                             ))}
-                        </ul>
+                        </div>
                     )}
                 </div>
-
-                <div>
-                    <h3>Create new task</h3>
-                    <label>
-                        Title:
-                        <input type="text" value={titleTask} onChange={e => setTitleTask(e.target.value)} style={{ display: 'block', padding: '8px', width: '100%', boxSizing: 'border-box', marginBottom: '10px' }} />
-                    </label>
-                    <label>
-                        Description:
-                        <textarea name="task-desc" value={descTask} onChange={e => setDescTask(e.target.value)} style={{ display: 'block', padding: '8px', width: '100%', boxSizing: 'border-box', marginBottom: '10px' }} />
-                    </label>
-                    <label>
-                        Due date:
-                        <input type="datetime-local" value={dueDateTask} onChange={e => setDueDateTask(e.target.value)} style={{ display: 'block', padding: '8px', width: '100%', boxSizing: 'border-box', marginBottom: '10px' }} />
-                    </label>
-                    <label>
-                        Task File:
-                        <input type="file" accept=".pdf" multiple onChange={e => setTaskFiles(Array.from(e.target.files))} style={{ display: 'block', marginBottom: '10px' }} />
-                    </label>
-                    <button type="button" onClick={(e) => handleTask(e)} style={{ padding: '8px 12px', background: '#17a2b8', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>Add new task</button>
+                
+                <div className="main-div p-5 rounded-xl space-y-4">
+                    <h3 className="text-lg font-semibold text-white">Create New Task</h3>
+                    <div>
+                        <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Title</label>
+                        <input
+                            type="text"
+                            value={titleTask}
+                            onChange={e => setTitleTask(e.target.value)}
+                            className="w-full p-2.5 text-sm bg-zinc-900 border border-zinc-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Description</label>
+                        <textarea
+                            name="task-desc"
+                            value={descTask}
+                            onChange={e => setDescTask(e.target.value)}
+                            className="w-full min-h-[80px] p-2.5 text-sm bg-zinc-900 border border-zinc-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Due Date</label>
+                        <input
+                            type="datetime-local"
+                            ref={backup}
+                            required
+                            value={dueDateTask}
+                            onChange={e => setDueDateTask(e.target.value)}
+                            className="w-full p-2.5 text-sm bg-zinc-900 border border-zinc-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Task File</label>
+                        <input
+                            type="file"
+                            accept=".pdf"
+                            multiple
+                            onChange={e => setTaskFiles(Array.from(e.target.files))}
+                            className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-500/10 file:cursor-pointer file:text-emerald-400 hover:file:bg-emerald-500/20 cursor-pointer"
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        onClick={(e) => handleTask(e)}
+                        className="w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm rounded-lg transition-colors cursor-pointer"
+                    >
+                        Add New Task
+                    </button>
                 </div>
-
-                <button type="submit" style={{ padding: '10px', background: '#28a745', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>
-                    Save Changes
-                </button>
-                <button type="button" onClick={() => navigate('/teacher-dashboard')} style={{ padding: '10px', background: '#6c757d', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>Cancel</button>
+                
+                <div className="flex flex-col items-center gap-3 pt-4">
+                    <button
+                        type="submit"
+                        className="w-full py-2.5 px-4 max-w-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm rounded-lg transition-colors shadow-md cursor-pointer"
+                    >
+                        Save Changes
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => navigate('/teacher-dashboard')}
+                        className="py-2.5 px-2 w-full max-w-md bg-zinc-700 hover:bg-zinc-600 text-white font-medium text-sm rounded-lg transition-colors cursor-pointer"
+                    >
+                        Cancel
+                    </button>
+                </div>
             </form>
         </div>
     );
