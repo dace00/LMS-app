@@ -302,7 +302,7 @@ function Teacher_dash() {
             <div className=" main-div p-3 rounded-xl border space-y-4 w-lg grid grid-cols-[auto] max-w-5xl mt-6">
                 <h3 className="text-lg course-title">Submissions Awaiting Grading</h3>
                 {ungradedSubmissions.length === 0 ? (
-                    <p className="text-emerald-400 text-sm bg-emerald-950/30 border border-emerald-900/50 p-3 rounded-lg">
+                    <p className="inner-div text-sm p-3 rounded-lg">
                         ✅ Everything is fully graded!
                     </p>
                 ) : (

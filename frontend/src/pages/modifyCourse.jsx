@@ -6,7 +6,7 @@ function ModifyCourse() {
     const [sections, setSections] = useState([]);
     const [selectedSectionId, setSelectedSectionId] = useState('');
     const [newSectionTitle, setNewSectionTitle] = useState('');
-    const [pendingFile, setPendingFile] = useState(null);
+    const [pendingFile, setPendingFile] = useState([]);
     const [editingSectionId, setEditingSectionId] = useState(null);
     const [editingSectionTitle, setEditingSectionTitle] = useState('');
     const [tasks, setTasks] = useState([]);
@@ -46,8 +46,7 @@ function ModifyCourse() {
     };
 
     const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+        const file = Array.from(e.target.files);
         setPendingFile(file);
     };
 
@@ -65,8 +64,10 @@ function ModifyCourse() {
             formData.append("section_title", newSectionTitle);
         }
 
-        if (pendingFile) {
-            formData.append("course-files", pendingFile);
+        if(pendingFile.length > 0) {
+        pendingFile.forEach((file) => {
+            formData.append("course-files", file);
+        });
         }
 
         try {
@@ -89,14 +90,13 @@ function ModifyCourse() {
             setError(err.message);
         }
     };
-
-    // Adds a new section and/or uploads a file to a section, without saving the course
+    
     const handleAddSection = async () => {
         if (!newSectionTitle.trim() && !selectedSectionId) {
             setError('Enter a new section title or select an existing section.');
             return;
         }
-        if (!newSectionTitle.trim() && !pendingFile) {
+        if (!newSectionTitle.trim() && pendingFile.length === 0) {
             setError('Choose a file to upload to the selected section.');
             return;
         }
@@ -107,8 +107,10 @@ function ModifyCourse() {
         } else {
             formData.append('section_id', selectedSectionId);
         }
-        if (pendingFile) {
-            formData.append('course-files', pendingFile);
+        if (pendingFile.length > 0) {
+           pendingFile.forEach((file) => {
+               formData.append("course-files", file);
+           })
         }
 
         try {
@@ -134,7 +136,7 @@ function ModifyCourse() {
 
             setNewSectionTitle('');
             setSelectedSectionId('');
-            setPendingFile(null);
+            setPendingFile([]);
             setFileInputKey(k => k + 1); // clears the file input
             setError('');
         } catch (err) {
@@ -147,7 +149,7 @@ function ModifyCourse() {
 
         try {
             const res = await fetch(`http://localhost:3000/teacher/sections/${sectionId}`, {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -287,6 +289,13 @@ function ModifyCourse() {
 
     return (
         <div className="min-h-screen bg-zinc-900 p-8 max-w-3xl mx-auto w-full font-sans text-zinc-100">
+            <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="inline-block text-sm text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer mb-3"
+            >
+                ← Back
+            </button>
             <h2 className="text-2xl font-bold text-white ">Modify Course</h2>
             {error && <p className="text-sm text-red-400 bg-red-950/40 border border-red-900/50 p-3 rounded-lg mb-4">{error}</p>}
 
@@ -301,10 +310,7 @@ function ModifyCourse() {
                             value={course.title || ''}
                             onChange={handleChange}
                             required
-                            className="w-full p-3 w-full mt-1 min-h-0 p-3 text-sm bg-zinc-900 border
-                                    border-gray-800 rounded-lg text-gray-100 focus:outline-none
-                                    hover:border-gray-700 focus:border-2 focus:border-gray-700
-                                    transition-all duration-100 text-sm rounded-lg text-gray-100 focus:outline-none transition-colors"
+                            className="w-full p-3 mt-1 min-h-0 text-sm bg-zinc-900 border border-gray-800 rounded-lg text-gray-100 focus:outline-none hover:border-gray-700 focus:border-2 focus:border-gray-700 transition-all duration-100"
                         />
                     </div>
 
@@ -319,7 +325,7 @@ function ModifyCourse() {
                         />
                     </div>
                 </div>
-               
+
                 <div className="main-div p-5 rounded-xl space-y-4">
                     <h4 className="text-lg font-semibold text-white">Manage Sections</h4>
                     {sections.length === 0 ? (
@@ -334,9 +340,13 @@ function ModifyCourse() {
                                                 type="text"
                                                 value={editingSectionTitle}
                                                 onChange={(e) => setEditingSectionTitle(e.target.value)}
-                                                className="p-1.5 text-sm bg-zinc-800 border border-zinc-700 rounded text-white flex-1 focus:outline-none focus:border-emerald-500"
+                                                className="text-gray-300 transition-colors bg-gray-950/50 border-gray-800/60 border hover:border-emerald-500/30
+                                                rounded-xl px-2 focus:border-emerald-500/30 focus:border-2 focus:outline-none "
                                             />
-                                            <button type="button" onClick={() => handleUpdateSectionName(section.id)} className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded transition-colors cursor-pointer">Save</button>
+                                            <button type="button" onClick={() => handleUpdateSectionName(section.id)}
+                                                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded transition-colors cursor-pointer">
+                                                Save
+                                            </button>
                                             <button type="button" onClick={() => setEditingSectionId(null)} className="bg-zinc-700 hover:bg-zinc-600 text-white text-xs px-3 py-1.5 rounded transition-colors cursor-pointer">Cancel</button>
                                         </div>
                                     ) : (
@@ -384,15 +394,15 @@ function ModifyCourse() {
                     )}
                 </div>
 
-                
-                <div className="main-div  p-5 rounded-xl space-y-4">
+
+                <div className="main-div p-5 rounded-xl space-y-4">
                     <h4 className="text-lg font-semibold text-white">Add New File / Section</h4>
                     <div>
                         <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Select Existing Section</label>
                         <select
                             value={selectedSectionId}
                             onChange={(e) => { setSelectedSectionId(e.target.value); setNewSectionTitle(''); }}
-                            className="w-full p-2.5 text-sm  bg-zinc-900 border-1 border-gray-800 hover:border-gray-700 cursor-pointer rounded-xl focus:outline-none transition-all duration-200"
+                            className="w-full p-2.5 text-sm bg-zinc-900 border border-gray-800 hover:border-gray-700 cursor-pointer rounded-xl focus:outline-none transition-all duration-200"
                         >
                             <option value="">-- Choose Section --</option>
                             {sections.map(sec => (
@@ -416,12 +426,13 @@ function ModifyCourse() {
                             key={fileInputKey}
                             type="file"
                             accept=".pdf"
+                            multiple
                             onChange={handleFileChange}
                             className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-500/10 file:cursor-pointer file:text-emerald-400 hover:file:bg-emerald-500/20 cursor-pointer"
                         />
                     </div>
 
-                    
+
                     <button
                         type="button"
                         onClick={handleAddSection}
@@ -431,15 +442,15 @@ function ModifyCourse() {
                     </button>
                 </div>
 
-              
+
                 <div className="pt-4 border-t border-zinc-700/50 space-y-4">
-                    <h3 className="text-xl font-semibold text-white">Course Tasks & Submissions</h3>
-                    {tasks.length === 0 ? (
-                        <p className="text-gray-400 text-sm italic">No tasks created yet.</p>
-                    ) : (
-                        <div className="main-div space-y-3">
-                            {tasks.map((task) => (
-                                <div key={task.id} className="bg-zinc-800/60 border border-zinc-700/50 p-4 rounded-lg flex justify-between items-center">
+                    <div className="main-div space-y-3">
+                        <h3 className="text-xl font-semibold text-white">Course Tasks & Submissions</h3>
+                        {tasks.length === 0 ? (
+                            <p className="text-gray-400 text-sm italic">No tasks created yet.</p>
+                        ) : (
+                            tasks.map((task) => (
+                                <div key={task.id} className="inner-div p-4 rounded-lg flex justify-between items-center">
                                     <div>
                                         <strong className="text-white text-sm">{task.title}</strong>
                                         <p className="text-xs text-gray-400 mt-1">
@@ -462,12 +473,12 @@ function ModifyCourse() {
                                         </button>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            ))
+                        )}
+                    </div>
                 </div>
-                
-                <div className="main-div p-5 rounded-xl space-y-4">
+
+                <div className="bg-zinc-800/60 p-6 max-w-md mx-auto border border-zinc-700/50 hover:border-emerald-500/30 transition-all hover:-translate-y-1 duration-200 rounded-xl space-y-4">
                     <h3 className="text-lg font-semibold text-white">Create New Task</h3>
                     <div>
                         <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Title</label>
@@ -475,7 +486,7 @@ function ModifyCourse() {
                             type="text"
                             value={titleTask}
                             onChange={e => setTitleTask(e.target.value)}
-                            className="w-full p-2.5 text-sm bg-zinc-900 border border-zinc-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500"
+                            className="inner-div-form"
                         />
                     </div>
                     <div>
@@ -484,7 +495,7 @@ function ModifyCourse() {
                             name="task-desc"
                             value={descTask}
                             onChange={e => setDescTask(e.target.value)}
-                            className="w-full min-h-[80px] p-2.5 text-sm bg-zinc-900 border border-zinc-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500"
+                            className="inner-div-form"
                         />
                     </div>
                     <div>
@@ -495,7 +506,7 @@ function ModifyCourse() {
                             required
                             value={dueDateTask}
                             onChange={e => setDueDateTask(e.target.value)}
-                            className="w-full p-2.5 text-sm bg-zinc-900 border border-zinc-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500"
+                            className="inner-div-form"
                         />
                     </div>
                     <div>
@@ -516,7 +527,7 @@ function ModifyCourse() {
                         Add New Task
                     </button>
                 </div>
-                
+
                 <div className="flex flex-col items-center gap-3 pt-4">
                     <button
                         type="submit"

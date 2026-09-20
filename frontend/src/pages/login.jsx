@@ -36,19 +36,22 @@ function Login() {
     };
 
     return (
-        <div className="max-w-md mx-auto my-16 p-8 border border-none rounded-xl shadow-lg">
+        <div className="max-w-md mx-auto my-16 p-8 main-div rounded-xl shadow-lg">
             <h2 className="text-2xl  mb-6 text-center !text-[#d4d4d8]">LMS Login</h2>
 
             {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
 
-            <form onSubmit={handleLogin} className="flex flex-col gap-4 form-card">
+            <form onSubmit={handleLogin} className="flex flex-col inner-div mb-3 gap-4 form-card">
                 <input
                     type="email"
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="form-input"
+                    className="text-gray-300 px-3 transition-colors bg-gray-950/50
+                    border-gray-800/60 hover:border-emerald-500/30 border
+                     focus:border-2 focus:outline-none focus:border-emerald-500/30
+                      rounded-xl"
                 />
                 <input
                     type="password"
@@ -56,7 +59,10 @@ function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="form-input"
+                    className="text-gray-300 px-3 transition-colors bg-gray-950/50
+                    border-gray-800/60 hover:border-emerald-500/30 border
+                     focus:border-2 focus:outline-none focus:border-emerald-500/30
+                     rounded-xl"
                 />
                 <button
                     type="submit"
