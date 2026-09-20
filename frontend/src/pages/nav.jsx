@@ -133,16 +133,16 @@ function Nav() {
                 )}
 
                 {isDropdownOpen && (
-                    <div className="absolute right-0 top-14 bg-white shadow-lg rounded-lg overflow-hidden w-40 flex flex-col border border-gray-100 z-50">
+                    <div className="absolute right-0 top-14 border-gray-950/50 backdrop-blur-sm shadow-lg rounded-lg overflow-hidden w-40 flex flex-col border border-gray-100 z-50">
                         <button
                             onClick={() => { setIsDropdownOpen(false); navigate('/profile'); }}
-                            className="px-4 py-3 border-none bg-transparent text-left cursor-pointer text-sm text-gray-700 hover:bg-gray-50 transition"
+                            className="px-4 py-3 border-none bg-transparent text-left cursor-pointer text-sm text-emerald-400 hover:text-emerald-400 hover:font-bold transition"
                         >
                             View Profile
                         </button>
                         <button
                             onClick={handleLogout}
-                            className="px-4 py-3 border-none bg-transparent text-left cursor-pointer text-sm text-red-500 hover:bg-gray-50 transition"
+                            className="px-4 py-3 border-none bg-transparent text-left cursor-pointer text-sm text-red-500 hover:text-red-500 hover:font-bold transition"
                         >
                             Log Out
                         </button>

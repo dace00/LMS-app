@@ -121,8 +121,7 @@ function Student_dash() {
                         <h3 className="feature-title">Unenrolled Courses</h3>
                         <div className="flex flex-col gap-3">
                             {unenrolledCourses.map(course => (
-                                <div key={course.id} className="flex justify-between items-center bg-zinc-900/50 p-3 rounded-lg
-                                border border-zinc-700/50">
+                                <div key={course.id} className="flex justify-between items-center inner-div p-3 rounded-xl">
                                     <span className="text-zinc-300 font-medium">{course.title}</span>
                                     <button
                                         onClick={() => handleEnroll(course.id)}
@@ -147,7 +146,7 @@ function Student_dash() {
                                     {isEnrolled && (
                                         <Link
                                             to={`courses/${course.id}`}
-                                            className="block p-3 bg-zinc-900/50 rounded-lg border border-zinc-700/50 text-zinc-300 hover:text-emerald-400 hover:border-emerald-500/50 transition font-medium no-underline"
+                                            className="block p-3 inner-div rounded-xl transition font-medium no-underline"
                                         >
                                             {course.title}
                                         </Link>
@@ -165,7 +164,7 @@ function Student_dash() {
                     ) : (
                         <ul className="flex flex-col gap-3 list-none p-0 m-0">
                             {pendingTasks.map(task => (
-                                <li key={task.id} className="bg-zinc-900/50 p-3 rounded-lg border border-zinc-700/50 flex flex-col gap-1">
+                                <li key={task.id} className="inner-div rounded-xl p-3 flex flex-col gap-1">
                                     <strong className="text-zinc-200">Title: {task.title}</strong>
                                     <p className="feature-desc m-0">Description: {task.description}</p>
                                     <span className="text-xs text-emerald-400 mt-1">Course: {task.course_title}</span>

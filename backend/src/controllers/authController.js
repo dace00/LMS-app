@@ -10,23 +10,36 @@ const registerUser = async (req, res) => {
         if (userExists.rows.length > 0) {
             return res.status(400).json({ error: "Email already exists" });
         }
-        const complex = 10;
-        const hashedPassword = await bcrypt.hash(password, complex);
-        if(role==="teacher" && teacher_pass !== process.env.TEACHER_PASS) {
-            return res.status(401).json({
-                error: "Invalid secret teacher password"
-            })
+
+        if (role === "teacher" && teacher_pass !== process.env.TEACHER_PASS) {
+            return res.status(401).json({ error: "Invalid secret teacher password" });
         }
-        const newUser = await pool.query(
-            'INSERT INTO users (first_name, last_name, email, password_hash, index_number, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, first_name, index_number, role', [first_name, last_name, email, hashedPassword, index_number, role]
-        );
-        return res.status(200).json(newUser);
+
+        if (role === "student" && !index_number) {
+            return res.status(400).json({ error: "Index number is required for students" });
         }
-    catch(err) {
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        if (index_number) {
+            const newUser = await pool.query(
+                'INSERT INTO users (first_name, last_name, email, password_hash, index_number, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, first_name, index_number, role',
+                [first_name, last_name, email, hashedPassword, index_number, role]
+            );
+            return res.status(200).json(newUser);
+        } else {
+            const newUser = await pool.query(
+                'INSERT INTO users (first_name, last_name, email, password_hash, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, first_name, index_number, role',
+                [first_name, last_name, email, hashedPassword, role]
+            );
+            return res.status(200).json(newUser);
+        }
+    } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Something went wrong" });
     }
 };
+
 
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
