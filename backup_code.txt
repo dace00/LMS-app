@@ -25,3 +25,9 @@ useEffect(() => {
                                 </li>
                             ))}
                         </ul> */}
+
+
+                          <header className="flex items-start justify-center px-10 py-5 bg-zinc-800/50 shadow-md border-b border-zinc-700/50">
+                                        <h2 className="mt-5 text-xl font-bold text-center bg-linear-to-br from-zinc-900 via-[#547990]
+                               to-zinc-900 animate-[gradient-shift_5s_ease-in-out_infinite_alternate] bg-animated  bg-[length:300%_300%] bg-clip-text text-transparent">Welcome to the LMS platform!</h2>
+                                    </header>

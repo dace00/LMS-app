@@ -43,12 +43,7 @@ function Home() {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-900 flex flex-col font-sans">
-
-            <header className="flex items-start justify-center px-10 py-5 bg-zinc-800 shadow-md border-b border-zinc-700/50">
-                <h2 className="mt-5 text-xl font-bold text-center text-emerald-500">Welcome to the LMS platform!</h2>
-            </header>
-
+        <div className="min-h-screen flex flex-col font-sans">
             <main className="flex-1 flex flex-col items-center justify-center text-center px-10 py-10">
                 {isLoggedIn ? (
                     <div className="flex flex-col items-center">
@@ -122,19 +117,19 @@ function Home() {
                         <div className="mt-5 mb-3">
                             <h4 className="text-lg font-semibold text-emerald-400 mb-5">Available features</h4>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-5xl w-full text-center">
-                                <div className="bg-zinc-800/60 p-6 rounded-xl border border-zinc-700/50">
+                                <div className="main-div p-6 rounded-xl border ">
                                     <h3 className="text-emerald-400 font-semibold text-lg mb-2 border-b-1">Secure Submissions</h3>
                                     <p className="text-zinc-400 text-sm leading-relaxed">
                                         Students can easily upload assignments with validation, supporting pdf formats directly to their portal.
                                     </p>
                                 </div>
-                                <div className="bg-zinc-800/60 p-6 rounded-xl border border-zinc-700/50">
+                                <div className="main-div p-6 rounded-xl border ">
                                     <h3 className="text-emerald-400 font-semibold text-lg mb-2 border-b-1">Real-Time <br/> Tracking</h3>
                                     <p className="text-zinc-400 text-sm leading-relaxed">
                                         Instant grade visibility and submission status updates so students never have to guess where they stand.
                                     </p>
                                 </div>
-                                <div className="bg-zinc-800/60 p-6 rounded-xl border border-zinc-700/50">
+                                <div className="main-div p-6 rounded-xl border ">
                                     <h3 className="text-emerald-400 font-semibold text-lg mb-2 border-b-1">Streamlined Grading</h3>
                                     <p className="text-zinc-400 text-sm leading-relaxed">
                                         Teachers can review incoming student work, post grades, and manage tasks efficiently from a unified dashboard.

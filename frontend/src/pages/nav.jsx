@@ -54,9 +54,11 @@ function Nav() {
     const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
 
     return (
-        <nav className="w-full grid grid-cols-3 items-center px-8 py-4 border-none shadow-lg sticky top-0 z-50 bg-zinc-800">
+        <nav className="w-full fixed grid grid-cols-3 items-center px-8 py-2 border-none shadow-xl top-0 z-50 bg-stone-700/20 backdrop-blur-sm">
             <div className="flex items-center">
-                <h3 className="text-2xl font-bold no-underline select-none text-emerald-400 cursor-default">
+                <h3 className="italic text-2xl font-bold no-underline select-none
+                bg-linear-to-br from-white via-cyan-500 to-white
+                bg-clip-text text-transparent cursor-default">
                     LMS
                 </h3>
             </div>
@@ -64,10 +66,10 @@ function Nav() {
                 <NavLink
                     to="/"
                     className={({ isActive }) =>
-                        `no-underline font-medium px-3 py-2 rounded-lg transition-all duration-300 ${
+                        `no-underline font-medium px-3 py-1 rounded-lg focus:outline-none ${
                             isActive
-                                ? 'bg-zinc-700 text-emerald-400'
-                                : 'text-zinc-300 hover:text-emerald-400 hover:bg-zinc-700/50'
+                                ? 'bg-blue-900/40 focus:border-1 border-white/30 text-cyan-400 transition-all duration-200'
+                                : 'text-zinc-300 border-none hover:text-cyan-400 hover:bg-zinc-700/50 transition-all duration-200'
                         }`
                     }
                 >
@@ -78,10 +80,10 @@ function Nav() {
                     <NavLink
                         to="/student-dashboard"
                         className={({ isActive }) =>
-                            `no-underline font-medium px-3 py-2 rounded-lg transition-all duration-300 select-none ${
+                            `no-underline font-medium px-3 py-1 rounded-lg focus:outline-none ${
                                 isActive
-                                    ? 'bg-zinc-700 text-emerald-400'
-                                    : 'text-zinc-300 hover:text-emerald-400 hover:bg-zinc-700/50'
+                                    ? 'bg-blue-900/40 focus:border-1 border-white/30 text-cyan-400 transition-all duration-200'
+                                    : 'text-zinc-300 border-none hover:text-cyan-400 hover:bg-zinc-700/50 transition-all duration-200'
                             }`
                         }
                     >
@@ -91,10 +93,10 @@ function Nav() {
                     <NavLink
                         to="/teacher-dashboard"
                         className={({ isActive }) =>
-                            `no-underline font-medium px-3 py-2 rounded-lg transition-all duration-300 select-none ${
+                            `no-underline font-medium px-3 py-1 rounded-lg focus:outline-none ${
                                 isActive
-                                    ? 'bg-zinc-700 text-emerald-400'
-                                    : 'text-zinc-300 hover:text-emerald-400 hover:bg-zinc-700/50'
+                                    ? 'bg-blue-900/40 focus:border-1 border-white/30 text-cyan-400 transition-all duration-200'
+                                    : 'text-zinc-300 border-none hover:text-cyan-400 hover:bg-zinc-700/50 transition-all duration-200'
                             }`
                         }
                     >
