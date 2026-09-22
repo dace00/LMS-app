@@ -56,7 +56,7 @@ function Nav() {
     return (
         <nav className="w-full grid grid-cols-3 items-center px-8 py-4 border-none shadow-lg sticky top-0 z-50 bg-zinc-800">
             <div className="flex items-center">
-                <h3 className="text-2xl font-bold no-underline select-none text-emerald-400 cursor-default">
+                <h3 className="italic text-2xl font-bold no-underline select-none text-emerald-400 cursor-default">
                     LMS
                 </h3>
             </div>
@@ -107,7 +107,7 @@ function Nav() {
 
             <div className="relative flex justify-end">
                 {token ? (
-                    <div className=" transition-shadow duration-200 border border-black rounded-full bg-zinc-700 border-emerald-500/50 hover:ring-2  ring-emerald-500/60 overflow-hidden cursor-pointer flex items-center justify-center p-1" ref={ref}>
+                    <div className=" transition-shadow duration-200 border border-black rounded-full bg-zinc-700 border-emerald-500/50 hover:ring-2 ring-emerald-500/60 overflow-hidden cursor-pointer flex items-center justify-center p-1" ref={ref}>
                         <svg
                             className="w-10 h-10"
                             viewBox="0 0 24 24"
