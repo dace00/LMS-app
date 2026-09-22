@@ -114,7 +114,7 @@ function Student_dash() {
                 {/* <p className="text-emerald-400 text-lg font-medium">{message}</p> */}
             </header>
 
-            <div className={`grid grid-cols-1 ${unenrolledCourses.length > 0 ? 'md:grid-cols-3 max-w-5xl' : 'md:grid-cols-2 max-w-3xl'} gap-6 my-12 w-full`}>
+            <div className={`grid  ${unenrolledCourses.length > 0 ? 'md:grid-cols-2 max-w-5xl' : 'md:grid-cols-2 max-w-3xl'} gap-6 my-12 w-full`}>
 
                 {unenrolledCourses.length > 0 && (
                     <div className="feature-card flex flex-col gap-4">
@@ -157,7 +157,7 @@ function Student_dash() {
                     </div>
                 </div>
 
-                <div className="feature-card flex flex-col gap-4">
+                <div className="feature-card flex flex-col col-span-2 w-1/2 justify-self-center gap-4">
                     <h3 className="feature-title">Pending Assignments</h3>
                     {pendingTasks.length === 0 ? (
                         <p className="feature-desc">No pending tasks right now.</p>

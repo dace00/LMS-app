@@ -44,7 +44,7 @@ function CourseContent() {
                     <p className="text-gray-400 text-sm leading-relaxed">{course.description}</p>
                 </div>
 
-                <div className="feature-card grid grid-cols-[auto] place-items-center">
+                <div className="feature-card grid grid-cols-[auto] gap-2 place-items-center">
                     <h2 className="course-title">
                         Course Materials
                     </h2>
@@ -52,10 +52,12 @@ function CourseContent() {
                     {sections.length === 0 ? (
                         <p className="text-gray-500 italic">No sections available for this course yet.</p>
                     ) : (
-                        sections.map((section) => (
+                        <>
+                        <div className="grid grid-cols-2 gap-2">
+                            {sections.map((section) => (
                             <div
                                 key={section.id}
-                                className="bg-zinc-900/60 border border-gray-800 w-[auto] rounded-xl p-5 shadow-md transition-all hover:border-gray-700"
+                                className="bg-zinc-900/60 border border-gray-800 rounded-xl p-5 shadow-md transition-all [&:nth-child(odd):last-child]:col-span-2  [&:nth-child(odd):last-child]:w-1/2 [&:nth-child(odd):last-child]:justify-self-center hover:border-gray-700"
                             >
                                 <h3 className="text-lg text-[#d4d4d8] font-medium text-white transition-colors block mb-2">{section.title}</h3>
 
@@ -78,7 +80,9 @@ function CourseContent() {
                                     </ul>
                                 )}
                             </div>
-                        ))
+                        ))}
+                        </div>
+                        </>
                     )}
                 </div>
 
@@ -90,16 +94,16 @@ function CourseContent() {
                     {tasks.length === 0 ? (
                         <p className="text-gray-500 italic">No tasks available.</p>
                     ) : (
-                        <ul className="grid gap-4 sm:grid-cols-[auto] place-items-center">
+                        <ul className="flex flex-wrap gap-2 place-items-center">
                             {tasks.map((task) => (
                                 <li
                                     key={task.id}
-                                    className="bg-zinc-900/60 border border-gray-800 rounded-xl p-4 shadow-md flex flex-col justify-between transition-all hover:border-gray-700"
+                                    className="bg-zinc-900/60 border border-gray-800  rounded-xl p-4 shadow-md flex flex-col justify-between transition-all hover:border-gray-700"
                                 >
                                     <div>
                                         <Link
                                             to={`./task/${task.id}`}
-                                            className="text-md font-medium text-white hover:text-emerald-400 transition-colors block mb-2"
+                                            className="text-md font-medium text-white hover:text-emerald-400 transition-colors block "
                                         >
                                             {task.title}
                                         </Link>

@@ -333,7 +333,7 @@ return (
 
                                         <button
                                             onClick={() => setIsSubmitted(false)}
-                                            className="py-1.5 px-3 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-medium rounded-lg transition-colors cursor-pointer"
+                                            className="py-1.5 px-3 bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 border border-violet-500/30 text-xs font-medium rounded-lg transition-colors cursor-pointer"
                                         >
                                             Edit submission
                                         </button>

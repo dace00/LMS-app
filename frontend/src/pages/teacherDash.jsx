@@ -299,7 +299,8 @@ function Teacher_dash() {
             </div>
 
             {/* Submissions Awaiting Grading */}
-            <div className=" main-div p-3 rounded-xl border space-y-4 w-lg grid grid-cols-[auto] max-w-5xl mt-6">
+            <div className={`bg-zinc-800/60 p-6 rounded-xl border w-[auto] border-zinc-700/50 hover:border-emerald-500/30 
+            transition-all duration-200 space-y-4 w-lg grid grid-cols-[auto] items-center justify-center max-w-5xl mt-6 ${!isOpen ? 'hover:-translate-y-1' : ''}`}>
                 <h3 className="text-lg course-title">Submissions Awaiting Grading</h3>
                 {ungradedSubmissions.length === 0 ? (
                     <p className="inner-div text-sm p-3 rounded-lg">
@@ -308,12 +309,13 @@ function Teacher_dash() {
                 ) : (
                     <div className="grid grid-cols-2 space-y-3">
                         {ungradedSubmissions.map(sub => (
-                            <div key={sub.submission_id} className=" inner-div p-2 m-2  rounded-lg flex flex-col gap-3 space-y-3">
+                            <div key={sub.submission_id} className=" inner-div p-2 m-2  rounded-lg flex flex-col [&:nth-child(odd):last-child]:col-span-2
+                            [&:nth-child(odd):last-child]:justify-self-center [&:nth-child(odd):last-child]:w-1/2 gap-3 space-y-3">
                                 <p className="text-xs text-gray-200 ">
                                     <strong className="text-white">{sub.first_name}</strong> ({sub.email}) submitted for <em className="text-emerald-400">{sub.task_title}</em> in <strong className="text-gray-300">{sub.course_title}</strong>
                                 </p>
                                 <p className="text-xs p-1 text-gray-300  transition-colors bg-gray-950/50 border rounded-xl border-gray-800/60 hover:border-emerald-500/30">
-                                    <span className="font-semibold text-gray-300">Description:</span> {sub.submission_text || "No text provided."}
+                                    <span className="font-semibold text-gray-300">Description: <br/> </span> {sub.submission_text || "No text provided."}
                                 </p>
                                 <button
                                     onClick={() => navigate(`/tasks/${sub.task_id}/submissions`)}

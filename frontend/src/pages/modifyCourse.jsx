@@ -503,7 +503,6 @@ function ModifyCourse() {
                         <input
                             type="datetime-local"
                             ref={backup}
-                            required
                             value={dueDateTask}
                             onChange={e => setDueDateTask(e.target.value)}
                             className="inner-div-form"

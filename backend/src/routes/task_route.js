@@ -9,11 +9,12 @@ const { uploadTask, uploadSubmit } = require('../middleware/uploadConfig');
 router.post('/courses/modify/:id/tasks', Verify, uploadTask.array("taskFiles"), async (req, res) => {
     const { id } = req.params;
     const { titleTask, descTask, dueDateTask } = req.body;
-
-    // Map multiple uploaded task files into arrays for PostgreSQL TEXT[] columns
+    
     const filePaths = req.files && req.files.length > 0
         ? req.files.map(file => `/taskFiles/${file.filename}`)
         : [];
+
+    const dueDate = dueDateTask && dueDateTask.trim() !== "" ? dueDateTask : null;
 
     const fileNames = req.files && req.files.length > 0
         ? req.files.map(file => file.originalname)
@@ -22,7 +23,7 @@ router.post('/courses/modify/:id/tasks', Verify, uploadTask.array("taskFiles"), 
     try {
         const result = await pool.query(
             'INSERT INTO tasks (course_id, title, description, due_date, file_name, file_path) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [id, titleTask, descTask, dueDateTask, fileNames, filePaths]
+            [id, titleTask, descTask, dueDate, fileNames, filePaths]
         );
         res.status(200).json(result.rows[0]);
     }
