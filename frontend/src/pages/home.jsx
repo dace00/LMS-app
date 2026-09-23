@@ -116,25 +116,29 @@ function Home() {
                         </div>
                         <div className="mt-5 mb-3">
                             <h4 className="text-lg font-semibold text-emerald-400 mb-5">Available features</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-5xl w-full text-center">
-                                <div className=" p-6 rounded-xl main-div">
-                                    <h3 className="text-emerald-400 font-semibold text-lg mb-2 border-b-1">Secure Submissions</h3>
-                                    <p className="text-zinc-400 text-sm leading-relaxed">
+                            <div className="grid  md:grid-cols-3 gap-6 mb-12 max-w-5xl w-full text-center">
+
+                                <div className="p-6 rounded-xl main-div flex flex-col">
+                                    <h3 className="text-emerald-400 font-semibold text-lg mb-2 border-b border-zinc-700">Secure Submissions</h3>
+                                    <p className="inner-div rounded-xl text-sm text-zinc-400 p-2 leading-relaxed flex-1 flex items-center justify-center">
                                         Students can easily upload assignments with validation, supporting pdf formats directly to their portal.
                                     </p>
                                 </div>
-                                <div className=" p-6 rounded-xl main-div">
-                                    <h3 className="text-emerald-400 font-semibold text-lg mb-2 border-b-1">Real-Time <br/> Tracking</h3>
-                                    <p className="text-zinc-400 text-sm leading-relaxed">
+                                
+                                <div className="p-6 rounded-xl main-div flex flex-col">
+                                    <h3 className="text-emerald-400 font-semibold text-lg mb-2 border-b border-zinc-700">Real-Time <br/> Tracking</h3>
+                                    <p className="inner-div rounded-xl text-sm text-zinc-400 p-2 leading-relaxed flex-1 flex items-center justify-center">
                                         Instant grade visibility and submission status updates so students never have to guess where they stand.
                                     </p>
                                 </div>
-                                <div className=" p-6 rounded-xl main-div">
-                                    <h3 className="text-emerald-400 font-semibold text-lg mb-2 border-b-1">Streamlined Grading</h3>
-                                    <p className="text-zinc-400 text-sm leading-relaxed">
+                                
+                                <div className="p-6 rounded-xl main-div flex flex-col">
+                                    <h3 className="text-emerald-400 font-semibold text-lg mb-2 border-b border-zinc-700">Streamlined Grading</h3>
+                                    <p className="inner-div rounded-xl text-sm text-zinc-400 p-2 leading-relaxed flex-1 flex items-center justify-center">
                                         Teachers can review incoming student work, post grades, and manage tasks efficiently from a unified dashboard.
                                     </p>
                                 </div>
+
                             </div>
                         </div>
                         <div className="flex justify-center gap-4">
